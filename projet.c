@@ -23,7 +23,7 @@ char* concat(const char *s1, const char *s2)
 }
 
 
-void create_fuc() // start from 16     // will create only one directory need work for second and more directories !!!!!!!!
+void create_func() // start from 16     // will create only one directory need work for second and more directories !!!!!!!!
 {
     firstofpath = &string_path[0] ;
     char* dir = &string_path[0] ;
@@ -124,12 +124,76 @@ void create_fuc() // start from 16     // will create only one directory need wo
     }
 }
 
+void insert_func() // start from 15
+{
+    firstofpath = &string_path[0] ;
+    int i = 15 ;
+    if(string_inpu[i] == '"') // be careful
+    {
+        i += 2;
+        int siz = 0;
+        while(string_inpu[i] != '"')
+        {
+            char temp[100] ;
+            int j = 0;
+            while(string_inpu[i] != '/' && string_inpu[i] != '"' )
+            {
+                temp[j] = string_inpu[i];
+                j++;
+                i++;
+                siz++ ;
+            }
+            char fin[siz] ;
+            for (int k = 0; k < siz; k++)
+            {
+                fin[k] = temp[k] ;
+            }
+            siz = 0 ;
+            firstofpath = concat(firstofpath, "\\");
+            firstofpath = concat(firstofpath, fin);
+            if(string_inpu[i] != '"') i++ ;
+        }
+        fp = fopen(firstofpath,"w");  // will creat a file 
+        //  i am in file 
+
+        fclose(fp);
+    }
+    else{
+        while(string_inpu[i] != '\n' && string_inpu[i] != ' ' && string_inpu[i] != '\0')
+        {
+            char temp[100] ;
+            int siz = 0;
+            int j = 0;
+            while(string_inpu[i] != '/' && string_inpu[i] != '\n' && string_inpu[i] != ' ' && string_inpu[i] != '\0' )
+            {
+                temp[j] = string_inpu[i];
+                j++;
+                i++;
+                siz++;
+            }
+            // add string between 17 & i-1 into "D:\C\project\project-kiarashkia138\"
+            //  add with backslashe !! 
+            char fin[siz] ;
+            for (int k = 0; k < siz; k++)
+            {
+                fin[k] = temp[k] ;
+            }
+            siz = 0 ;
+            firstofpath = concat(firstofpath, "\\");
+            firstofpath = concat(firstofpath, fin);
+            i++ ;
+        }
+        fp = fopen(firstofpath,"w");  // will creat a file 
+        fclose(fp);
+    }
+}
+
 
 void check()
 {
     int eenndd = strstr(string_inpu,"exit");
     int create = strstr(string_inpu,"createfile--file");
-    // int temp_de = strstr(string_str,deposit_string);
+    int insert = strstr(string_inpu,"insertstr--file");
     // int temp_wi = strstr(string_str,withdraw_string);
     // int temp_ba = strstr(string_str,balance_string);
     // int temp_tr = strstr(string_str,transfer_string);
@@ -139,7 +203,11 @@ void check()
         end = 0 ;
     else if(create)
     {
-        create_fuc();
+        create_func();
+    }
+    else if(insert)
+    {
+        insert_func();
     }
     else
         printf("Invalid input\n");
