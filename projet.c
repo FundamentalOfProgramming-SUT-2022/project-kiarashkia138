@@ -72,7 +72,7 @@ void create_func() // start from 16     // will create only one directory need w
         // clrscr();
         // printf("%s\n",dir);
         CreateDirectory (dir, NULL); // need to check
-        fp = fopen(firstofpath,"w");  // will creat a file 
+        fp = fopen(firstofpath,"a+");  // will creat a file 
         fclose(fp);
     }
     else{
@@ -119,7 +119,7 @@ void create_func() // start from 16     // will create only one directory need w
         // printf("%s\n",dir);
         // printf("%s\n",firstofpath);
         CreateDirectory (dir, NULL); 
-        fp = fopen(firstofpath,"w");  // will creat a file 
+        fp = fopen(firstofpath,"a+");  // will creat a file 
         fclose(fp);
     }
 }
@@ -153,7 +153,7 @@ void insert_func() // start from 15
             firstofpath = concat(firstofpath, fin);
             if(string_inpu[i] != '"') i++ ;
         }
-        fp = fopen(firstofpath,"w");  // will creat a file 
+        fp = fopen(firstofpath,"a+");  // will creat a file 
         //  i am in file 
 
         fclose(fp);
@@ -183,7 +183,7 @@ void insert_func() // start from 15
             firstofpath = concat(firstofpath, fin);
             i++ ;
         }
-        fp = fopen(firstofpath,"w");  // will creat a file 
+        fp = fopen(firstofpath,"a+");  // will creat a file 
         fclose(fp);
     }
 }
