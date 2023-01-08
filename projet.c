@@ -13,10 +13,11 @@
 
 char string_inpu[256] ;
 char filename[MAX_line] ; // filename 
+char format[10] ; // format of last file for undo 
 int end = 1;
 
 
-void bringefilename(int start) // will create directory
+void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) 
 {
     // char filename[MAX_line] ;
     // char* filename ;
@@ -88,7 +89,7 @@ void error(int number)
     }
 }
 
-
+// create file 
 void create_func() // start from 16     // will create only one directory need work for second and more directories !!!!!!!!
 {
     bringefilename(16);
@@ -103,14 +104,37 @@ void create_func() // start from 16     // will create only one directory need w
 // undo 
 void undo_func() // will copy undo temp to this file
 {
+    char temp2[MAX_line] = "root/undo/temp2" ;
+    char temp[MAX_line] = "root/undo/temp" ;
+    strcat(temp,format); 
+    strcat(temp2,format); 
+    FILE* undo2 = fopen(temp2,"w") ;
+    FILE* file = fopen(filename,"r") ;
+
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file)) keep_reading = false ;
+        else
+        {
+            fputs(buffer,undo2) ;
+        }
+    }
+    fclose(file) ;
+    fclose(undo2) ;
+
+    remove(filename) ;
     
+    rename(temp2,temp) ;
+    rename(temp,filename) ;
 }
 
 void save_for_undo() // must be used before undo
 {
     char temp[MAX_line] = "root/undo/temp";
     int i = 0 , j = 0;
-    char format[10] ;
     while(filename[i] != '\0' && filename[i] != '\n') // for file format
     {
         if(filename[i] == '.')
