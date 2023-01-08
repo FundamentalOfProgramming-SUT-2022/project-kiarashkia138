@@ -11,23 +11,29 @@
 # define MAX_line 2048 
 
 
-char string_inpu[256] ;
+char string_inpu[MAX_line] ;
 char filename[MAX_line] ; // filename 
+char temp_dir[MAX_line] ; // directory 
+char dir[MAX_line] ;
 char format[10] ; // format of last file for undo 
-int end = 1;
+int end = 1,char_pos = 0; // char_pos use for where the next start
 
 
 void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) 
 {
     // char filename[MAX_line] ;
     // char* filename ;
+    memset(filename,0,sizeof(filename)) ;
+    memset(temp_dir,0,sizeof(temp_dir)) ;
+
     int temp_cnt = 0;
     int cnt_dir = 0;
     if(string_inpu[start] == '"')
     {
         start += 2; // after slash 
+        char_pos = start ;
         // char temp[MAX_line] ;
-        char temp_dir[MAX_line] ;
+        // char temp_dir[MAX_line] ; // directory
         while(string_inpu[start] != '"')
         {
             filename[temp_cnt] = string_inpu[start] ;
@@ -45,15 +51,17 @@ void bringefilename(int start) // will create directory // start positin is ( " 
             }
             start ++ ;
             temp_cnt ++ ;
+            char_pos ++ ;
         }
     }
 
     else
     {
         start++ ; // after slash
+        char_pos = start ;
         // char temp[MAX_line] ;
         char temp_dir[MAX_line] ;
-        while(string_inpu[start] != '\0' && string_inpu[start] != '\n' && string_inpu[start] != ' ')
+        while(string_inpu[start] != '\0' && string_inpu[start] != '\n' && string_inpu[start] != ' ' && string_inpu[start] != '-')
         {
             filename[temp_cnt] = string_inpu[start] ;
             if(string_inpu[start] != '/')
@@ -70,9 +78,38 @@ void bringefilename(int start) // will create directory // start positin is ( " 
             }
             start ++ ;
             temp_cnt ++ ;
+            char_pos ++ ;
         }
     }
     filename[temp_cnt] = '\0' ;
+    temp_dir[temp_cnt] = '\0' ;
+}
+
+
+void find_dir()
+{
+    memset(dir,0,sizeof(dir)) ;
+    int i = 0 ;
+    bool conti = true ;
+    while(filename[i] != '\0')
+    {
+        char temp[MAX_line] ;
+        int j = 0 ;
+        while(filename[i] != '/')
+        {
+            if(filename[i] == '.')
+            {
+                conti = false ;
+                break ;
+            }
+            temp[j] = filename[i] ;
+            i++ ;
+            j++ ;
+        }
+        temp[j] = filename[i] ;
+        if(conti) strcat(dir,temp) ;
+        i++ ;
+    }
 }
 
 
@@ -90,7 +127,7 @@ void error(int number)
 }
 
 // create file 
-void create_func() // start from 16     // will create only one directory need work for second and more directories !!!!!!!!
+void create_func() // start from 16     // can't create file or dir with ( - )
 {
     bringefilename(16);
     FILE* file = fopen(filename,"a");
@@ -99,7 +136,28 @@ void create_func() // start from 16     // will create only one directory need w
     fclose(file);
 }
 
+// insert file
+void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
+{
+    char_pos = 0 ; // will return pos of ( " ) or ( - )
+    bringefilename(15) ;
+    save_for_undo() ;
+    strcat(dir,"tempfileforcopy") ;
+    strcat(dir,format) ;
+    FILE* new = fopen(dir,"w") ;
+    FILE* file = fopen(filename,"r") ;
 
+    char replace[MAX_line] ;
+
+    char_pos++ ; // i want to check for ( " )
+    while(string_inpu[char_pos] != '"')
+    {
+        char_pos++ ;
+    }
+    char_pos++ ;
+    
+
+}
 
 // undo 
 void undo_func() // will copy undo temp to this file
@@ -126,7 +184,7 @@ void undo_func() // will copy undo temp to this file
     fclose(undo2) ;
 
     remove(filename) ;
-    
+
     rename(temp2,temp) ;
     rename(temp,filename) ;
 }
@@ -156,6 +214,9 @@ void save_for_undo() // must be used before undo
         if(feof(file)) keep_reading = false ;
         else fputs(buffer,undo) ;
     }
+    
+    fclose(undo) ;
+    fclose(file) ;
 }
 
 void check()
@@ -171,10 +232,10 @@ void check()
     {
         create_func();
     }
-    // else if(insert)
-    // {
-    //     // insert_func();
-    // }
+    else if(insert)
+    {
+        insert_func();
+    }
     else if(undoo)
     {
         undo_func();
@@ -186,7 +247,7 @@ void check()
 
 void input_in()
 {
-    fgets(string_inpu,256,stdin);
+    fgets(string_inpu,MAX_line,stdin);
     check();
 }
 
