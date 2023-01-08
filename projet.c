@@ -113,6 +113,70 @@ void find_dir()
 }
 
 
+long long int into_num(int i ) // i is position of start
+{
+    
+    long long ret = 0 ;
+    while (string_inpu[i] != ':' && string_inpu[i] != ' ' && string_inpu[i] != '\n' && string_inpu[i] != '\0')
+    {   
+        switch (string_inpu[i])
+        {
+            case '0' :
+                ret *= 10 ;
+                break;
+
+            case '1': 
+                ret *= 10 ;
+                ret += 1;
+                break;
+            
+            case '2':
+                ret *= 10 ;
+                ret += 2;
+                break;
+
+            case '3':
+                ret *= 10 ;
+                ret += 3;
+                break;
+
+            case '4':
+                ret *= 10 ;
+                ret += 4;
+                break;
+
+            case '5':
+                ret *= 10 ;
+                ret += 5;
+                break;
+
+            case '6':
+                ret *= 10 ;
+                ret += 6;
+                break;
+
+            case '7':
+                ret *= 10 ;
+                ret += 7;
+                break;
+
+            case '8':
+                ret *= 10 ;
+                ret += 8;
+                break;
+
+            case '9':
+                ret *= 10 ;
+                ret += 9;
+                break;
+        }
+        i++ ;
+        char_pos++ ; 
+    }
+    return ret;
+}
+
+
 void error(int number) 
 {
     switch(number)
@@ -122,6 +186,9 @@ void error(int number)
             break;
         case 2:
             printf("coudn't open file \n");
+            break;
+        case 3:
+            printf("something went wrong!! \n");
             break;
     }
 }
@@ -147,16 +214,93 @@ void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
     FILE* new = fopen(dir,"w") ;
     FILE* file = fopen(filename,"r") ;
 
-    char replace[MAX_line] ;
+    if(file == NULL)
+    {
+        error(2) ;
+        return ;
+    }
+    if(new == NULL)
+    {
+        error(3);
+        return ;
+    }
 
+    char replace[MAX_line] ;
     char_pos++ ; // i want to check for ( " )
     while(string_inpu[char_pos] != '"')
     {
         char_pos++ ;
     }
-    char_pos++ ;
-    
+    char_pos++ ; // start from after "
+    bool keep_reading = true ;
+    int i = 0 ;
+    while(keep_reading)
+    {
+        if(string_inpu[char_pos] == '"')
+        {
+            if(string_inpu[char_pos+1] == '-')
+            {
+                if(string_inpu[char_pos+2] == '-')
+                {
+                    if(string_inpu[char_pos+3] == 'p')
+                    {
+                        if(string_inpu[char_pos+4] == 'o')
+                        {
+                            if(string_inpu[char_pos+5] == 's')
+                            {
+                                keep_reading = false ;
+                                break ;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        replace[i] = string_inpu[char_pos] ;
+        i++ ;
+        char_pos++ ;
+    }
+    // char_pos -> --pos
+    char_pos += 5 ; // show the first number 
+    int num_line = into_num(char_pos) ;
+    int pos_in_file = into_num(char_pos+1) ;
 
+    int corrent_line = 1 ;
+    keep_reading = true ;
+    char buffer[MAX_line] ;
+    while(keep_reading)
+    {
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            fputs(buffer,new) ;
+        }
+        else if(corrent_line == num_line)
+        {
+            for(int k = 0; k < pos_in_file ; k++)
+            {
+                fprintf(new,"%c",buffer[k]);
+            }
+            fprintf(new,"%s",replace) ;
+            int k = pos_in_file;
+            while(buffer[k] != '\0' )
+            {
+                fprintf(new,"%c",buffer[k]) ;
+                k++ ;
+            }
+        }
+        else
+        {
+            fputs(buffer,new) ;
+        }
+        corrent_line++ ;
+    }
+
+    fclose(file); 
+    fclose(new);
+    remove(filename) ;
+    rename(dir,filename) ;
 }
 
 // undo 
@@ -169,12 +313,26 @@ void undo_func() // will copy undo temp to this file
     FILE* undo2 = fopen(temp2,"w") ;
     FILE* file = fopen(filename,"r") ;
 
+    if(file == NULL )
+    {
+        error(3);
+        return ;
+    }
+    if(undo2 == NULL)
+    {
+        error(3);
+        return;
+    }
     char buffer[MAX_line] ;
     bool keep_reading = true ;
     while(keep_reading)
     {
         fgets(buffer,MAX_line,file) ;
-        if(feof(file)) keep_reading = false ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            fputs(buffer,undo2) ;
+        }
         else
         {
             fputs(buffer,undo2) ;
@@ -192,20 +350,34 @@ void undo_func() // will copy undo temp to this file
 void save_for_undo() // must be used before undo
 {
     char temp[MAX_line] = "root/undo/temp";
-    int i = 0 , j = 0;
+    int i = 0 , j = 0 ,check = 0;
     while(filename[i] != '\0' && filename[i] != '\n') // for file format
     {
         if(filename[i] == '.')
         {
-            format[j] = filename[i];
-            j++ ;
+            while(filename[i] != '\0' && filename[i] != '\n')
+            {
+                format[j] = filename[i];
+                j++ ;
+                i++ ;   
+                check = 1 ; 
+            }
         }
-        i++ ;    
+        if(check == 0) i++ ;
     }
     strcat(temp,format) ;
     FILE* undo = fopen(temp,"w") ;
     FILE* file = fopen(filename,"r") ;
-
+    if(file == NULL )
+    {
+        error(3);
+        return ;
+    }
+    if(undo == NULL)
+    {
+        error(3);
+        return;
+    }
     char buffer[MAX_line] ;
     bool keep_reading = true ;
     while(keep_reading)
