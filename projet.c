@@ -19,7 +19,7 @@ char format[10] ; // format of last file for undo
 int end = 1,char_pos = 0; // char_pos use for where the next start
 
 
-void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) 
+void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( " ) or ( - ) or ( \0 )
 {
     // char filename[MAX_line] ;
     // char* filename ;
@@ -60,7 +60,7 @@ void bringefilename(int start) // will create directory // start positin is ( " 
         start++ ; // after slash
         char_pos = start ;
         // char temp[MAX_line] ;
-        char temp_dir[MAX_line] ;
+        // char temp_dir[MAX_line] ;
         while(string_inpu[start] != '\0' && string_inpu[start] != '\n' && string_inpu[start] != ' ' && string_inpu[start] != '-')
         {
             filename[temp_cnt] = string_inpu[start] ;
@@ -117,7 +117,7 @@ long long int into_num(int i ) // i is position of start
 {
     
     long long ret = 0 ;
-    while (string_inpu[i] != ':' && string_inpu[i] != ' ' && string_inpu[i] != '\n' && string_inpu[i] != '\0')
+    while (string_inpu[i] != ':' && string_inpu[i] != '-' && string_inpu[i] != ' ' && string_inpu[i] != '\n' && string_inpu[i] != '\0')
     {   
         switch (string_inpu[i])
         {
@@ -182,16 +182,16 @@ void error(int number)
     switch(number)
     {
         case 1:
-            printf("coudn't create file \n");
+            printf("Error create file. \n");
             break;
         case 2:
-            printf("coudn't open file \n");
+            printf("Error open file. \n");
             break;
         case 3:
-            printf("something went wrong!! \n");
+            printf("Error...! something went wrong!! \n");
             break;
         case 4:
-            printf("coudn't cat file \n");
+            printf("Error...! unknown move please use -f(forward) or -b(backward). \n");
             break;
     }
 }
@@ -218,6 +218,7 @@ void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
     char_pos = 0 ; // will return pos of ( " ) or ( - )
     bringefilename(15) ;
     save_for_undo() ;
+    find_dir() ;
     strcat(dir,"tempfileforcopy") ;
     strcat(dir,format) ;
     FILE* new = fopen(dir,"w") ;
@@ -354,6 +355,104 @@ void cat_func() // start from 9
     fclose(file) ;
 }
 
+// remove
+void remove_func() // start from 15
+{
+    char_pos = 0 ; // will bring ( " ) or ( - )
+    bringefilename(15) ;
+    save_for_undo() ; // for undo 
+
+    char_pos += 5 ; // pos of first num 
+    int num_line = into_num(char_pos) ; // line
+    int num_pos = into_num(char_pos+1) ; // pos of first char
+    char_pos += 5 ;
+    int num_size = into_num(char_pos) ; // size for delete
+    char kindofmove = string_inpu[char_pos+1] ; // kind of move (r) or (f)
+
+    find_dir() ;
+    strcat(dir,"tempforremove") ;
+    strcat(dir,format) ;
+    FILE* file = fopen(filename ,"r") ;
+    FILE* temp = fopne(dir,"w") ;
+
+    if(file == NULL) 
+    {
+        error(2) ;
+        return ;
+    }
+    else if(temp == NULL) 
+    {
+        error(3) ;
+        return ;
+    }
+
+    bool keep_reaading = true ;
+    char buffer[MAX_line] ;
+    int corrent_line = 1 ;
+
+    // find the new pos (old position - size)
+    int new_line , new_pos;
+    if(kindofmove == 'f')
+    {
+
+    }
+    else if(kindofmove == 'b')
+    {
+        for (int i = 1; i <= num_size; i++)
+        {
+            if(num_pos == 0 )
+            {
+                num_line -= 1 ;
+            }
+            else 
+            {
+                num_pos -= i ;
+            }
+        }
+        
+    }
+
+    // delete chars
+    if(kindofmove == 'f')
+    {
+
+    }
+    else if(kindofmove == 'b')
+    {
+        while(keep_reaading)
+        {
+            memset(buffer,0,sizeof(buffer));
+            fgets(buffer,MAX_line,file);
+            if(feof(file))
+            {
+                keep_reaading = false ;
+                if(corrent_line == num_line)
+                {
+
+                }
+                else fputs(buffer,temp) ;
+            }
+
+            else if(corrent_line == num_line)
+            {
+                
+            }
+
+            else
+            {
+                fputs(buffer,temp) ;
+            }
+        }
+    }
+    else error(4) ;
+
+    fclose(file) ;
+    fclose(temp) ;
+
+    remove(filename) ;
+    rename(dir,filename) ;
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -457,6 +556,10 @@ void check()
     int insert = strstr(string_inpu,"insertstr--file");
     int undoo = strstr(string_inpu,"undo--file");
     int catt = strstr(string_inpu,"cat--file");
+    int removee = strstr(string_inpu,"removestr--file");
+    int copyy = strstr(string_inpu,"copystr--file");
+    int cutt = strstr(string_inpu,"cutstr--file");
+    int pastee = strstr(string_inpu,"pastestr--file");
     
     if(eenndd)
         end = 0 ;
@@ -475,6 +578,10 @@ void check()
     else if(catt)
     {
         cat_func() ;
+    }
+    else if(removee)
+    {
+        remove_func() ;
     }
     else
         printf("Invalid input\n");
