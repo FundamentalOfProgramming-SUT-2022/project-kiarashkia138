@@ -342,6 +342,7 @@ void cat_func() // start from 9
     bool keep_reading = true ;
     while(keep_reading)
     {
+        memset(buffer,0,sizeof(buffer));
         fgets(buffer,MAX_line,file) ;
         if(feof(file))
         {
@@ -377,6 +378,7 @@ void undo_func() // will copy undo temp to this file // just undo the  last file
     bool keep_reading = true ;
     while(keep_reading)
     {
+        memset(buffer,0,sizeof(buffer));
         fgets(buffer,MAX_line,file) ;
         if(feof(file))
         {
@@ -396,6 +398,7 @@ void undo_func() // will copy undo temp to this file // just undo the  last file
     rename(temp,filename) ;
     rename(temp2,temp) ;
 }
+
 
 void save_for_undo() // must be used before undo
 {
@@ -432,6 +435,7 @@ void save_for_undo() // must be used before undo
     bool keep_reading = true ;
     while(keep_reading)
     {
+        memset(buffer,0,sizeof(buffer));
         fgets(buffer,MAX_line,file) ;
         if(feof(file)) 
         {
@@ -445,6 +449,7 @@ void save_for_undo() // must be used before undo
     fclose(file) ;
 }
 
+// check 
 void check()
 {
     int eenndd = strstr(string_inpu,"exit");
