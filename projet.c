@@ -190,7 +190,16 @@ void error(int number)
         case 3:
             printf("something went wrong!! \n");
             break;
+        case 4:
+            printf("coudn't cat file \n");
+            break;
     }
+}
+
+
+void print_std(char* buffer)
+{
+    printf("%s\n", buffer);
 }
 
 // create file 
@@ -270,6 +279,7 @@ void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
     char buffer[MAX_line] ;
     while(keep_reading)
     {
+        memset(buffer, 0, sizeof(buffer));
         fgets(buffer,MAX_line,file) ;
         if(feof(file))
         {
@@ -318,8 +328,33 @@ void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
     rename(dir,filename) ;
 }
 
+// cat file
+void cat_func() // start from 9
+{
+    bringefilename(9);
+    FILE* file = fopen(filename,"r");
+    if(file == NULL)
+    {
+        error(2) ;
+    }
+
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            print_std(buffer) ;
+        }
+        else print_std(buffer) ;
+    }
+    fclose(file) ;
+}
+
 // undo 
-void undo_func() // will copy undo temp to this file
+void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
     char temp2[MAX_line] = "root/undo/temp2" ;
     char temp[MAX_line] = "root/undo/temp" ;
@@ -416,6 +451,7 @@ void check()
     int create = strstr(string_inpu,"createfile--file");
     int insert = strstr(string_inpu,"insertstr--file");
     int undoo = strstr(string_inpu,"undo--file");
+    int catt = strstr(string_inpu,"cat--file");
     
     if(eenndd)
         end = 0 ;
@@ -430,6 +466,10 @@ void check()
     else if(undoo)
     {
         undo_func();
+    }
+    else if(catt)
+    {
+        cat_func() ;
     }
     else
         printf("Invalid input\n");
