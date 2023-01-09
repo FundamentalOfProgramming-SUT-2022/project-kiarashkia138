@@ -274,7 +274,22 @@ void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
         if(feof(file))
         {
             keep_reading = false ;
-            fputs(buffer,new) ;
+            if(corrent_line == num_line)
+            {
+                for(int k = 0; k < pos_in_file ; k++)
+                {
+                    fprintf(new,"%c",buffer[k]);
+                }
+                fprintf(new,"%s",replace) ;
+                int k = pos_in_file;
+                while(buffer[k] != '\0' )
+                {
+                    fprintf(new,"%c",buffer[k]) ;
+                    k++ ;
+                }
+            }
+            else 
+                fputs(buffer,new) ;
         }
         else if(corrent_line == num_line)
         {
@@ -343,8 +358,8 @@ void undo_func() // will copy undo temp to this file
 
     remove(filename) ;
 
-    rename(temp2,temp) ;
     rename(temp,filename) ;
+    rename(temp2,temp) ;
 }
 
 void save_for_undo() // must be used before undo
@@ -383,7 +398,11 @@ void save_for_undo() // must be used before undo
     while(keep_reading)
     {
         fgets(buffer,MAX_line,file) ;
-        if(feof(file)) keep_reading = false ;
+        if(feof(file)) 
+        {
+            keep_reading = false ;
+            fputs(buffer,undo) ;
+        }
         else fputs(buffer,undo) ;
     }
     
