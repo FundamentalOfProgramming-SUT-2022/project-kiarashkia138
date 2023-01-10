@@ -478,6 +478,12 @@ void remove_func() // start from 15 // needs a lot of work !!
     rename(dir,filename) ;
 }
 
+// copy
+// void copy_func()
+// {
+
+// }
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -608,6 +614,10 @@ void check()
     {
         remove_func() ;
     }
+    // else if(copyy)
+    // {
+    //     copy_func() ;
+    // }
     else
         printf("Invalid input\n");
 }
