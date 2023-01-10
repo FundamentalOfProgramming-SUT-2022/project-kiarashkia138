@@ -19,7 +19,7 @@ char format[10] ; // format of last file for undo
 int end = 1,char_pos = 0; // char_pos use for where the next start
 
 
-void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( " ) or ( - ) or ( \0 )
+void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( - ) or ( \0 )
 {
     // char filename[MAX_line] ;
     // char* filename ;
@@ -53,6 +53,7 @@ void bringefilename(int start) // will create directory // start positin is ( " 
             temp_cnt ++ ;
             char_pos ++ ;
         }
+        char_pos ++ ;
     }
 
     else
@@ -236,7 +237,7 @@ void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
     }
 
     char replace[MAX_line] ;
-    char_pos++ ; // i want to check for ( " )
+    // char_pos++ ;  // will start from after " 
     while(string_inpu[char_pos] != '"')
     {
         char_pos++ ;
@@ -484,6 +485,77 @@ void remove_func() // start from 15 // needs a lot of work !!
 
 // }
 
+// cut
+// void cut_func()
+// {
+
+// }
+
+// paste
+// void paste_func()
+// {
+
+// }
+
+// find 
+void find_func() // start from 10
+{
+    char_pos = 0 ;
+    bringefilename(10);
+    FILE* file = fopen(filename,"r");
+    char_pos += 5 ;
+    int j = 0 ;
+    char find_str[MAX_line] ;
+    if(string_inpu[char_pos] == '"' )
+    {
+        char_pos ++ ;
+        while (string_inpu[char_pos] != '\0' )
+        {
+            if(string_inpu[char_pos] == '-')
+            {
+                if(string_inpu[char_pos + 1] == 'c')
+                {
+                    if(string_inpu[char_pos + 2] == 'o')
+                    {
+                        if(string_inpu[char_pos + 3] == 'u')
+                        {
+                            if(string_inpu[char_pos + 4] == 'n')
+                            {
+                                if(string_inpu[char_pos + 5] == 't')
+                                {
+
+                                }
+                            }
+                        }
+                    }
+                }
+                else if(string_inpu[char_pos + 1] == 'a')
+                {
+                    if(string_inpu[char_pos + 2] == 't')
+                    {
+
+                    }
+                }
+                else if(string_inpu[char_pos + 1] == 'b')
+                {
+                    if(string_inpu[char_pos + 2] == 'y')
+                    {
+                        
+                    }
+                }
+            }
+            find_str[j] = string_inpu[char_pos] ;
+            j++ ;
+            char_pos ++ ;
+        }
+
+    }
+    else
+    {
+
+    }
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -591,6 +663,7 @@ void check()
     int copyy = strstr(string_inpu,"copystr--file");
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
+    int findd = strstr(string_inpu,"find--file"); // find--file/root/something--str["]something["][-count/-at/-byword][-all]
     
     if(eenndd)
         end = 0 ;
@@ -618,6 +691,18 @@ void check()
     // {
     //     copy_func() ;
     // }
+    // else if(cutt)
+    // {
+    //     cut_func() ;
+    // }
+    // else if(pastee)
+    // {
+    //     paste_func() ;
+    // }
+    else if(findd)
+    {
+        find_func() ;
+    }
     else
         printf("Invalid input\n");
 }
