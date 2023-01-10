@@ -356,7 +356,7 @@ void cat_func() // start from 9
 }
 
 // remove
-void remove_func() // start from 15
+void remove_func() // start from 15 // needs a lot of work !!
 {
     char_pos = 0 ; // will bring ( " ) or ( - )
     bringefilename(15) ;
@@ -373,7 +373,7 @@ void remove_func() // start from 15
     strcat(dir,"tempforremove") ;
     strcat(dir,format) ;
     FILE* file = fopen(filename ,"r") ;
-    FILE* temp = fopne(dir,"w") ;
+    FILE* temp = fopen(dir,"w") ;
 
     if(file == NULL) 
     {
@@ -386,17 +386,14 @@ void remove_func() // start from 15
         return ;
     }
 
-    bool keep_reaading = true ;
+    bool keep_reading = true ;
     char buffer[MAX_line] ;
     int corrent_line = 1 ;
-
+    int corrent_pos = 0 ;
+    int size_del = 0 ;
     // find the new pos (old position - size)
-    int new_line , new_pos;
-    if(kindofmove == 'f')
-    {
-
-    }
-    else if(kindofmove == 'b')
+    // for finding the first one shoud be deleted
+    if(kindofmove == 'b')
     {
         for (int i = 1; i <= num_size; i++)
         {
@@ -404,28 +401,56 @@ void remove_func() // start from 15
             {
                 num_line -= 1 ;
             }
-            else 
-            {
-                num_pos -= i ;
-            }
+            num_pos -= i ; // if line change will bring back negetive valiue
         }
-        
     }
 
     // delete chars
     if(kindofmove == 'f')
     {
-
+        while(keep_reading)
+        {
+            memset(buffer, 0, sizeof(buffer));
+            fgets(buffer,MAX_line,file) ;
+            if(feof(file))
+            {
+                keep_reading = false ;
+            }
+            if(corrent_line == num_line)
+            {
+                while(buffer[corrent_pos] != '\0' )
+                {
+                    if(corrent_pos >= num_pos && corrent_pos < (num_pos + num_size))
+                    {
+                        size_del++ ;
+                    }
+                    else
+                    {
+                        fprintf(temp,"%c",buffer[corrent_pos]) ;
+                    }
+                    corrent_pos++ ;
+                }
+                if(size_del < num_size)
+                {
+                    num_size -= size_del ;
+                    num_line += 1 ;
+                } 
+            }
+            else
+            {
+                fputs(buffer,temp) ;
+            }
+        }
     }
     else if(kindofmove == 'b')
     {
-        while(keep_reaading)
+        while(keep_reading)
         {
             memset(buffer,0,sizeof(buffer));
             fgets(buffer,MAX_line,file);
             if(feof(file))
             {
-                keep_reaading = false ;
+                keep_reading = false ;
                 if(corrent_line == num_line)
                 {
 
