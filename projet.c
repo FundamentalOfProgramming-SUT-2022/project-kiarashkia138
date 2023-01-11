@@ -498,7 +498,7 @@ void remove_func() // start from 15 // needs a lot of work !!
 // }
 
 // find 
-void find_func() // start from 10
+void find_func() // start from 10 // find--file/root/something--str["]something["][-count/-at/-byword][-all]
 {
     char_pos = 0 ;
     bringefilename(10);
@@ -506,12 +506,13 @@ void find_func() // start from 10
     char_pos += 5 ;
     int j = 0 ;
     char find_str[MAX_line] ;
+    int shouid_count = 0 , shouid_at = 0 , shouid_word = 0,shouid_all = 0 ,num_word = 0;
     if(string_inpu[char_pos] == '"' )
     {
         char_pos ++ ;
         while (string_inpu[char_pos] != '\0' )
         {
-            if(string_inpu[char_pos] == '-')
+            if(string_inpu[char_pos] == '-') // check for ( -count ) ( -at ) ( -byword )
             {
                 if(string_inpu[char_pos + 1] == 'c')
                 {
@@ -523,7 +524,9 @@ void find_func() // start from 10
                             {
                                 if(string_inpu[char_pos + 5] == 't')
                                 {
-
+                                    char_pos += 6;
+                                    shouid_count = 1 ;
+                                    break;
                                 }
                             }
                         }
@@ -533,14 +536,31 @@ void find_func() // start from 10
                 {
                     if(string_inpu[char_pos + 2] == 't')
                     {
-
+                        char_pos += 3 ;
+                        shouid_at = 1 ;
+                        int which_n = into_num(char_pos) ; // come n with zero space 
+                        break;
                     }
                 }
                 else if(string_inpu[char_pos + 1] == 'b')
                 {
                     if(string_inpu[char_pos + 2] == 'y')
                     {
-                        
+                        if(string_inpu[char_pos + 3] == 'w')
+                        {
+                            if(string_inpu[char_pos + 4] == 'o')
+                            {
+                                if(string_inpu[char_pos + 5] == 'r')
+                                {
+                                    if(string_inpu[char_pos + 6] == 'd')
+                                    {
+                                        char_pos += 7;
+                                        shouid_word = 1 ;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -548,13 +568,48 @@ void find_func() // start from 10
             j++ ;
             char_pos ++ ;
         }
+        if(string_inpu[char_pos] == '-')
+        {
+            if(string_inpu[char_pos + 1] == 'a')
+            {
+                if(string_inpu[char_pos + 2] == 'l')
+                {
+                    if(string_inpu[char_pos + 3] == 'l')
+                    {
+                        shouid_all = 1 ;
+                    }
+                }
+            }
+        }
 
+
+        if(shouid_count )
+        {
+
+        }
+        else if(shouid_at)
+        {
+
+        }
+        else if(shouid_word)
+        {
+
+        }
+        else if (shouid_all )
+        {
+
+        }
+        else
+        {
+
+        }
     }
     else
     {
 
     }
 }
+
 
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
