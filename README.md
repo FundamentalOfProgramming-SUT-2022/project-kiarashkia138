@@ -1,1 +1,1 @@
-find part 
+new input divide by word
