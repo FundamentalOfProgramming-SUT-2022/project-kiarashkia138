@@ -100,14 +100,18 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
         {
             user_str[char_pos - first_pos] = string_inpu[char_pos] ;
         }
-        char_pos += 2 ;
+        char_pos += 1 ;
         // char_pos will be on space 
     }
     else if(type == 2)  // use after --str -->> += 7
     {
         char_pos += 7 ;
         if(string_inpu[char_pos] == '"') find_next_str(1) ;
-        else find_next_str(0) ;
+        else 
+        {
+            char_pos -= 7 ;
+            find_next_str(0) ;
+        }
     }
     else
     {
@@ -150,6 +154,7 @@ int find_options()
         else if(at) return 2 ;
         else if(byword) return 3 ;
         else if(all) return 10 ;
+        else return -1 ;
     }
     else return 0 ;
 }
@@ -262,9 +267,371 @@ void error(int number)
         case 4:
             printf("Error...! unknown move please use -f(forward) or -b(backward). \n");
             break;
+        case 5:
+            printf("Error...! Invalid input.\n") ;
     }
 }
 
+
+void print_std(char* buffer)
+{
+    printf("%s", buffer);
+}
+
+
+void print_std_i(int i)
+{
+    printf("%d\n",i) ;
+}
+
+// create file
+void create_func() // start from 16     // can't create file or dir with ( - )
+{
+    bringefilename(16);
+    FILE* file = fopen(filename,"a");
+    if(file == NULL)
+        error(1) ;
+    fclose(file);
+}
+
+// insert file
+void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --pos<>
+{
+    char_pos = 0 ; // will return pos of ( " ) or ( - )
+    bringefilename(15) ;
+    save_for_undo() ;
+    find_dir() ;
+    strcat(dir,"tempfileforcopy") ;
+    strcat(dir,format) ;
+    FILE* new = fopen(dir,"w") ;
+    FILE* file = fopen(filename,"r") ;
+
+    if(file == NULL)
+    {
+        error(2) ;
+        return ;
+    }
+    if(new == NULL)
+    {
+        error(3);
+        return ;
+    }
+
+    find_next_str(1) ;
+    char_pos += 7 ; // show the first number
+
+    int num_line = into_num(char_pos) ;
+    int pos_in_file = into_num(char_pos+1) ;
+    int corrent_line = 1 ;
+    bool keep_reading = true ;
+    char buffer[MAX_line] ;
+    while(keep_reading)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            if(corrent_line == num_line)
+            {
+                for(int k = 0; k < pos_in_file ; k++)
+                {
+                    fprintf(new,"%c",buffer[k]);
+                }
+                // fprintf(new,"%s",user_str) ;
+                 for (int l = 0 ; l < strlen(user_str) ; l++)
+                {
+                    if(user_str[l] == '\\')
+                    {
+                        if(user_str[l+1] == '\\')
+                        {
+                            if(user_str[l+2] == 'n')
+                            {
+                                fprintf(new,"\\n") ;
+                                l += 2 ;
+                            }
+                        }
+                        else if(user_str[l+1] == 'n')
+                        {
+                            fprintf(new,"\n") ;
+                            l++ ;
+                        }
+                        else
+                        {
+                            fprintf(new,"\\") ;
+                        }
+                    }
+                    else
+                    {
+                        fprintf(new,"%c",user_str[l]) ;
+                    }
+                }
+                int k = pos_in_file;
+                while(buffer[k] != '\0' )
+                {
+                    fprintf(new,"%c",buffer[k]) ;
+                    k++ ;
+                }
+            }
+            else 
+                fputs(buffer,new) ;
+        }
+        else if(corrent_line == num_line)
+        {
+            for(int k = 0; k < pos_in_file ; k++)
+            {
+                fprintf(new,"%c",buffer[k]);
+            }
+            // fprintf(new,"%s",user_str) ;
+            for (int l = 0 ; l < strlen(user_str) ; l++)
+                {
+                    if(user_str[l] == '\\')
+                    {
+                        if(user_str[l+1] == '\\')
+                        {
+                            if(user_str[l+2] == 'n')
+                            {
+                                fprintf(new,"\\n") ;
+                                l += 2 ;
+                            }
+                        }
+                        else if(user_str[l+1] == 'n')
+                        {
+                            fprintf(new,"\n") ;
+                            l++ ;
+                        }
+                        else
+                        {
+                            fprintf(new,"\\") ;
+                        }
+                    }
+                    else
+                    {
+                        fprintf(new,"%c",user_str[l]) ;
+                    }
+                }
+            int k = pos_in_file;
+            while(buffer[k] != '\0' )
+            {
+                fprintf(new,"%c",buffer[k]) ;
+                k++ ;
+            }
+        }
+        else
+        {
+            fputs(buffer,new) ;
+        }
+        corrent_line++ ;
+    }
+
+    fclose(file); 
+    fclose(new);
+    remove(filename) ;
+    rename(dir,filename) ;
+}
+
+// cat file
+void cat_func() // start from 9
+{
+    bringefilename(9);
+    FILE* file = fopen(filename,"r");
+    if(file == NULL)
+    {
+        error(2) ;
+    }
+
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            print_std(buffer) ;
+        }
+        else print_std(buffer) ;
+    }
+    print_std("\n") ;
+    fclose(file) ;
+}
+
+// find 
+void find_func() // start from 10 // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
+{
+    char_pos = 0;
+    bringefilename(10) ; // char_pos will be ( )
+    FILE* file = fopen(filename,"r") ;
+    if(file == NULL) 
+    {
+        error(2) ;
+        return ;
+    }
+    find_next_str(2) ;
+    char buffer[MAX_line] ;
+    int first_find_op = find_options() ;
+    int num_pos = 0; 
+    bool find = false; 
+    char* pos ;
+    if(first_find_op == 0) // no other options
+    {
+        while ((fgets(buffer,MAX_line, file)) != NULL)
+        {
+            pos = strstr(buffer, user_str);
+            if (pos != NULL)
+            {
+                num_pos += (pos - buffer);
+                find = true ;
+                break;
+            }
+            else
+            {
+                num_pos += strlen(buffer) ;
+            }
+        }
+    }
+    else if(first_find_op == 1) // count
+    {
+        if(find_options() == 10) // with all 
+        {
+            
+        }
+        else
+        {
+            
+        }
+    }
+    else if(first_find_op == 2) // at
+    {
+        if(find_options() == 10) // with all 
+        {
+            
+        }
+        else
+        {
+            
+        }
+    }
+    else if(first_find_op == 3)//byword
+    {
+        if(find_options() == 10) // with all 
+        {
+            
+        }
+        else
+        {
+            
+        }
+    }
+    else if(first_find_op == 10) // all
+    {
+        
+    }
+    else
+    {
+        error(5) ;
+    }
+
+    if(find) print_std_i(num_pos) ;
+    else print_std("Not Found\n") ;
+    fclose(file) ;
+}
+
+// undo 
+void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
+{
+    char temp2[MAX_line] = "root/undo/temp2" ;
+    char temp[MAX_line] = "root/undo/temp" ;
+    strcat(temp,format); 
+    strcat(temp2,format); 
+    FILE* undo2 = fopen(temp2,"w") ;
+    FILE* file = fopen(filename,"r") ;
+
+    if(file == NULL )
+    {
+        error(3);
+        return ;
+    }
+    if(undo2 == NULL)
+    {
+        error(3);
+        return;
+    }
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            fputs(buffer,undo2) ;
+        }
+        else
+        {
+            fputs(buffer,undo2) ;
+        }
+    }
+    fclose(file) ;
+    fclose(undo2) ;
+
+    remove(filename) ;
+
+    rename(temp,filename) ;
+    rename(temp2,temp) ;
+}
+
+
+void save_for_undo() // must be used before undo
+{
+    char temp[MAX_line] = "root/undo/temp";
+    int i = 0 , j = 0 ,check = 0;
+    while(filename[i] != '\0' && filename[i] != '\n') // for file format
+    {
+        if(filename[i] == '.')
+        {
+            while(filename[i] != '\0' && filename[i] != '\n')
+            {
+                format[j] = filename[i];
+                j++ ;
+                i++ ;   
+                check = 1 ; 
+            }
+        }
+        if(check == 0) i++ ;
+    }
+    strcat(temp,format) ;
+    FILE* undo = fopen(temp,"w") ;
+    FILE* file = fopen(filename,"r") ;
+    if(file == NULL )
+    {
+        error(3);
+        return ;
+    }
+    if(undo == NULL)
+    {
+        error(3);
+        return;
+    }
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file)) 
+        {
+            keep_reading = false ;
+            fputs(buffer,undo) ;
+        }
+        else fputs(buffer,undo) ;
+    }
+    
+    fclose(undo) ;
+    fclose(file) ;
+}
 
 // check 
 void check() // after adrress  comes space for seperating word 
@@ -280,9 +647,7 @@ void check() // after adrress  comes space for seperating word
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
     
-    if(eenndd)
-        end = 0 ;
-    else if(create)
+    if(create)
     {
         create_func();
     }
@@ -298,10 +663,10 @@ void check() // after adrress  comes space for seperating word
     {
         cat_func() ;
     }
-    else if(removee)
-    {
-        remove_func() ;
-    }
+    // else if(removee)
+    // {
+    //     remove_func() ;
+    // }
     // else if(copyy)
     // {
     //     copy_func() ;
@@ -318,6 +683,9 @@ void check() // after adrress  comes space for seperating word
     {
         find_func() ;
     }
+
+    else if(eenndd)
+        end = 0 ;
     else
         printf("Invalid input\n");
 }
