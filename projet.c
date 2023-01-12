@@ -62,7 +62,7 @@ void bringefilename(int start) // will create directory // start positin is ( " 
         char_pos = start ;
         // char temp[MAX_line] ;
         // char temp_dir[MAX_line] ;
-        while(string_inpu[start] != '\0' && string_inpu[start] != '\n' && string_inpu[start] != ' ' && string_inpu[start] != '-')
+        while(string_inpu[start] != '\0' && string_inpu[start] != ' ' && string_inpu[start] != '\n' ) //  && string_inpu[start] != '-'
         {
             filename[temp_cnt] = string_inpu[start] ;
             if(string_inpu[start] != '/')
@@ -214,7 +214,7 @@ void create_func() // start from 16     // can't create file or dir with ( - )
 }
 
 // insert file
-void insert_func() // start from 15 //insertstr--file<address>--str<>--pos<>
+void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --pos<>
 {
     char_pos = 0 ; // will return pos of ( " ) or ( - )
     bringefilename(15) ;
@@ -707,7 +707,7 @@ void save_for_undo() // must be used before undo
 }
 
 // check 
-void check()
+void check() // after adrress  comes space for seperating word 
 {
     int eenndd = strstr(string_inpu,"exit");
     int create = strstr(string_inpu,"createfile--file");
@@ -718,7 +718,7 @@ void check()
     int copyy = strstr(string_inpu,"copystr--file");
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
-    int findd = strstr(string_inpu,"find--file"); // find--file/root/something--str["]something["][-count/-at/-byword][-all]
+    int findd = strstr(string_inpu,"find--file"); // find--file/root/something --str["]something["] [-count/-at/-byword] [-all]
     
     if(eenndd)
         end = 0 ;
@@ -765,7 +765,7 @@ void check()
 
 void input_in()
 {
-    fgets(string_inpu,MAX_line,stdin);
+    gets(string_inpu);
     check();
 }
 
