@@ -1,1 +1,1 @@
-new input divide by word
+adding func becouse of changes
