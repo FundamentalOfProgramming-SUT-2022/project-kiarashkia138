@@ -154,9 +154,9 @@ int find_options()
         else if(at) return 2 ;
         else if(byword) return 3 ;
         else if(all) return 10 ;
-        else return -1 ;
+        else return 0 ;
     }
-    else return 0 ;
+    else return -1 ;
 }
 
 
@@ -350,10 +350,20 @@ void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --po
                                 fprintf(new,"\\n") ;
                                 l += 2 ;
                             }
+                            else if(user_str[l+2] == 't')
+                            {
+                                fprintf(new,"\\t") ;
+                                l += 2 ;
+                            }
                         }
                         else if(user_str[l+1] == 'n')
                         {
                             fprintf(new,"\n") ;
+                            l++ ;
+                        }
+                        else if(user_str[l+1] == 't')
+                        {
+                            fprintf(new,"\t") ;
                             l++ ;
                         }
                         else
@@ -394,10 +404,20 @@ void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --po
                                 fprintf(new,"\\n") ;
                                 l += 2 ;
                             }
+                            else if(user_str[l+2] == 't')
+                            {
+                                fprintf(new,"\\t") ;
+                                l += 2 ;
+                            }
                         }
                         else if(user_str[l+1] == 'n')
                         {
                             fprintf(new,"\n") ;
+                            l++ ;
+                        }
+                        else if(user_str[l+1] == 't')
+                        {
+                            fprintf(new,"\t") ;
                             l++ ;
                         }
                         else
@@ -457,7 +477,106 @@ void cat_func() // start from 9
     fclose(file) ;
 }
 
-// find 
+// find
+// wild
+void string_che(char buffer [] , int* pos, bool* find)
+{
+    int len_buf = strlen(buffer) ;
+    int len_user = strlen(user_str); 
+    int count = 0, nege = 1;
+    if(user_str[0] == '*')
+    {
+        for(int i = 0 ; i < len_buf ; i++)
+        {
+            for (int j = 1; j < len_user; j++)
+            {
+                if(user_str[j] == '\\' && user_str[j+1] == '*')
+                {
+                    j++;
+                    nege++ ;
+                    if(user_str[j] == buffer[i+j-nege])
+                        count++ ;
+                    else
+                        break;
+                }
+                else if(user_str[j] == buffer[i+j-nege])
+                {
+                    count++;
+                }
+                else 
+                    break;
+            }
+            // printf("count : %d , nege : %d\n",count,nege);
+            if(count >= (len_user-nege) && (buffer[i+len_user-nege] == ' ' || buffer[i+len_user-nege] == '\n' || buffer[i+len_user-nege] == '\0'))
+            {
+                while(buffer[*(pos)] != ' ')
+                {
+                    if(*(pos) == 0)
+                    {
+                        *(pos) -= 1 ;
+                        break;
+                    }
+                    *(pos) -= 1 ;
+                }
+                *(pos) += 1 ;
+                *(find) = true ;
+                return ;
+            }
+            *(pos) += 1 ;
+            count = 0 ;
+            nege = 1;
+        }
+    }
+    else
+    {
+        nege = 0;
+        for(int i = 0 ; i < len_buf ; i++)
+        {
+            if(buffer[i-1] == ' ' || i == 0)
+            {
+                for (int j = 0; j < len_user; j++)
+                {
+                    if(user_str[j] == '\\' && user_str[j+1] == '*')
+                    {
+                        j++;
+                        nege++;
+                        if(user_str[j] == buffer[i+j-nege])
+                            count++ ;
+                        else
+                            break;
+                    }
+                    else if(buffer[i+j-nege] == user_str[j])
+                    {
+                        count++ ;
+                    }
+                    else 
+                        break;
+                }
+                if(user_str[len_user-1] == '*' && user_str[len_user-2] != '\\')
+                {
+                    nege++ ;
+                }
+                else
+                {
+                    count-- ;
+                    if(buffer[i+len_user-nege] == ' ' || buffer[i+len_user-nege] == '\n' || buffer[i+len_user-nege] == '\0') 
+                        count++ ;
+
+                }
+                if(count >= len_user-nege)
+                {
+                    *(find) = true ;
+                    return ;
+                }
+            }
+            count = 0;
+            *(pos) += 1 ;
+            nege = 0 ;
+        }
+    }
+}
+
+
 void find_func() // start from 10 // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
 {
     char_pos = 0;
@@ -472,25 +591,27 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     char buffer[MAX_line] ;
     int first_find_op = find_options() ;
     int num_pos = 0; 
-    bool find = false; 
-    char* pos ;
+    bool* find = (bool*)malloc(sizeof(bool)); 
+    int* pos = (int*)malloc(sizeof(int));
+    *(find) = false;
+    *(pos) = 0 ;
+
     if(first_find_op == 0) // no other options
     {
         while ((fgets(buffer,MAX_line, file)) != NULL)
         {
-            pos = strstr(buffer, user_str);
-            if (pos != NULL)
+            *(pos) = 0 ;
+            string_che(buffer, pos,find) ;
+            if(*(find))
             {
-                num_pos += (pos - buffer);
-                find = true ;
+                num_pos += *(pos) ;
                 break;
             }
             else
-            {
-                num_pos += strlen(buffer) ;
-            }
+                num_pos += *(pos) ;
         }
     }
+    
     else if(first_find_op == 1) // count
     {
         if(find_options() == 10) // with all 
@@ -533,7 +654,7 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
         error(5) ;
     }
 
-    if(find) print_std_i(num_pos) ;
+    if(*(find)) print_std_i(num_pos) ;
     else print_std("Not Found\n") ;
     fclose(file) ;
 }
