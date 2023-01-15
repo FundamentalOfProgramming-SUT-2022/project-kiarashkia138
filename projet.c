@@ -478,56 +478,6 @@ void cat_func() // start from 9
 }
 
 // remove
-// find pos and size
-void ch_rem(FILE* file ,int size_rem ,int *line ,int *pos , bool* keep) 
-{
-    if(*(keep)) 
-        return ;
-
-    char buffer[MAX_line] ;
-    int now_line = 1 , len = 0;
-
-    if(*(pos) < 0)
-    {
-        while(fgets(buffer,MAX_line,file) != NULL)
-        {
-            if(now_line == *(line))
-            {
-                len = strlen(buffer) ;
-                len-- ;
-                if(len - size_rem >= 0)
-                {
-                    // *(line) -= 1; 
-                    *(pos) = len - size_rem ;
-                    *(keep) = true ;
-                    return ;
-                }
-                else
-                {
-                    size_rem -= len; 
-                    *(line) -= 1 ;
-                    ch_rem(file,size_rem ,line ,pos,keep) ;
-                }
-            }
-            now_line ++ ;
-        }
-    }
-
-    else if((*(pos) - size_rem) >= 0)
-    {
-        *(pos) -= size_rem ;
-        *(keep) = true ;
-        return ;
-    }
-    else
-    {
-        *(pos) -= size_rem ;
-        *(line) -= 1;
-        ch_rem(file,size_rem,line,pos,keep) ;
-    }
-}
-
-
 void remove_func()
 {
     bringefilename(15) ;
@@ -546,12 +496,10 @@ void remove_func()
         char_pos++;
     }
     char_pos ++ ; // after space
-    int* line = (int*)malloc(sizeof(int)) ;
-    *(line) = into_num(char_pos) ;
+    int line = into_num(char_pos) ;
     char_pos ++ ;
 
-    int* pos = (int*)malloc(sizeof(int)) ;
-    *(pos) = into_num(char_pos) ;
+    int pos = into_num(char_pos) ;
     char_pos ++ ;
 
     while(string_inpu[char_pos] != ' ')
@@ -562,56 +510,101 @@ void remove_func()
     int size = into_num(char_pos) ;
 
     char_pos += 2 ;
-    bool* keep = (bool*)malloc(sizeof(bool)) ;
-    *(keep) = false ;
+
+    char c ;
+    int now_line = 1;
+    int now_pos = 0;
+    int i = 0;
+    char temp[MAX_line] ;
+    int temp_i[MAX_line] = {0} ;
 
     if(string_inpu[char_pos] == 'b')
     {
-        ch_rem(file,size,line,pos,keep) ;
+        while((c = fgetc(file)) != EOF)
+        {
+            temp[i] = c ;
+            if(now_line == line && now_pos == pos)
+            {
+                temp_i[i-1] = 1;
+                temp_i[i-size] = 1;
+            }
+            if(c == '\n')
+            {
+                now_line++ ;
+                now_pos = 0 ;
+            }
+            else
+                now_pos++ ;
+            i++ ;
+        }
+        temp[i] = '\0' ;
+        int max = i ;
+        int dob = 0 ;
+        for(i = 0; i < max ;i++)
+        {
+            if(temp_i[i] == 1 )
+            {   
+                dob++ ;
+                dob %= 2 ;
+            }
+        
+            else if(dob == 0)
+            {
+                fputc(temp[i] ,new) ;
+            }
+        }
     }
-    else if(string_inpu[char_pos] != 'f')
+    else if(string_inpu[char_pos] == 'f')
     {
+        while((c = fgetc(file)) != EOF)
+        {
+            temp[i] = c ;
+            if(now_line == line && now_pos == pos)
+            {
+                temp_i[i] = 1;
+                temp_i[i+size-1] = 1;
+            }
+            if(c == '\n')
+            {
+                now_line++ ;
+                now_pos = 0 ;
+            }
+            else
+                now_pos++ ;
+            i++ ;
+        }
+        temp[i] = '\0' ;
+        int max = i ;
+        int dob = 0 ;
+        for(i = 0; i < max ;i++)
+        {
+            if(temp_i[i] == 1 )
+            {   
+                dob++ ;
+                dob %= 2 ;
+            }
+        
+            else if(dob == 0)
+            {
+                fputc(temp[i] ,new) ;
+            }
+        }
+    }
+    else 
+    {
+        fclose(file) ;
+        fclose(new) ;
         error(5) ;
         return ;
     }
 
     // printf("line : %d , pos : %d , size : %d , type : %d\n",*(line),*(pos),size,type) ;
-    int now_size = 0 ;
-    int now_line = 1 ;
-    int now_pos = 0 ;
-
-    char buffer[MAX_line] ;
-
-    while(fgets(buffer,MAX_line,file) != NULL)
-    {
-        if(now_line >= *(line) && now_size < size)
-        {
-            int len = strlen(buffer) ;
-            for(now_pos = 0 ; now_pos < len ; now_pos++)
-            {
-                if(now_pos >= pos && now_size < size)
-                {
-                    now_size++ ;
-                }
-                else
-                {
-                    fprintf(new,"%c",buffer[now_pos]) ;
-                }
-            }
-        }
-        else
-        {
-            fputs(buffer , new) ;
-        }
-        now_line ++ ;
-    }
 
     fclose(file) ;
     fclose(new) ;
     remove(filename) ;
     rename(dir ,filename) ;
 }
-
 
 // find
 // wild
