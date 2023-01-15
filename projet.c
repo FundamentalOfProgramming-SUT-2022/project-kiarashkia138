@@ -477,6 +477,142 @@ void cat_func() // start from 9
     fclose(file) ;
 }
 
+// remove
+// find pos and size
+void ch_rem(FILE* file ,int size_rem ,int *line ,int *pos , bool* keep) 
+{
+    if(*(keep)) 
+        return ;
+
+    char buffer[MAX_line] ;
+    int now_line = 1 , len = 0;
+
+    if(*(pos) < 0)
+    {
+        while(fgets(buffer,MAX_line,file) != NULL)
+        {
+            if(now_line == *(line))
+            {
+                len = strlen(buffer) ;
+                len-- ;
+                if(len - size_rem >= 0)
+                {
+                    // *(line) -= 1; 
+                    *(pos) = len - size_rem ;
+                    *(keep) = true ;
+                    return ;
+                }
+                else
+                {
+                    size_rem -= len; 
+                    *(line) -= 1 ;
+                    ch_rem(file,size_rem ,line ,pos,keep) ;
+                }
+            }
+            now_line ++ ;
+        }
+    }
+
+    else if((*(pos) - size_rem) >= 0)
+    {
+        *(pos) -= size_rem ;
+        *(keep) = true ;
+        return ;
+    }
+    else
+    {
+        *(pos) -= size_rem ;
+        *(line) -= 1;
+        ch_rem(file,size_rem,line,pos,keep) ;
+    }
+}
+
+
+void remove_func()
+{
+    bringefilename(15) ;
+    save_for_undo() ;
+    find_dir() ;
+
+    strcat(dir,"tempforremove") ;
+    strcat(dir,format) ;
+
+    FILE* file = fopen(filename,"r") ;
+    FILE* new = fopen(dir,"w") ;
+
+    char_pos++ ; // after space
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+    char_pos ++ ; // after space
+    int* line = (int*)malloc(sizeof(int)) ;
+    *(line) = into_num(char_pos) ;
+    char_pos ++ ;
+
+    int* pos = (int*)malloc(sizeof(int)) ;
+    *(pos) = into_num(char_pos) ;
+    char_pos ++ ;
+
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+    char_pos ++ ; // after space
+    int size = into_num(char_pos) ;
+
+    char_pos += 2 ;
+    bool* keep = (bool*)malloc(sizeof(bool)) ;
+    *(keep) = false ;
+
+    if(string_inpu[char_pos] == 'b')
+    {
+        ch_rem(file,size,line,pos,keep) ;
+    }
+    else if(string_inpu[char_pos] != 'f')
+    {
+        error(5) ;
+        return ;
+    }
+
+    // printf("line : %d , pos : %d , size : %d , type : %d\n",*(line),*(pos),size,type) ;
+    int now_size = 0 ;
+    int now_line = 1 ;
+    int now_pos = 0 ;
+
+    char buffer[MAX_line] ;
+
+    while(fgets(buffer,MAX_line,file) != NULL)
+    {
+        if(now_line >= *(line) && now_size < size)
+        {
+            int len = strlen(buffer) ;
+            for(now_pos = 0 ; now_pos < len ; now_pos++)
+            {
+                if(now_pos >= pos && now_size < size)
+                {
+                    now_size++ ;
+                }
+                else
+                {
+                    fprintf(new,"%c",buffer[now_pos]) ;
+                }
+            }
+        }
+        else
+        {
+            fputs(buffer , new) ;
+        }
+        now_line ++ ;
+    }
+
+    fclose(file) ;
+    fclose(new) ;
+    remove(filename) ;
+    rename(dir ,filename) ;
+}
+
+
 // find
 // wild
 void string_che(char buffer [] , int* pos, bool* find)
@@ -763,7 +899,7 @@ void check() // after adrress  comes space for seperating word
     int undoo = strstr(string_inpu,"undo--file");
     int catt = strstr(string_inpu,"cat--file");
     int findd = strstr(string_inpu,"find--file"); // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
-    int removee = strstr(string_inpu,"removestr--file");
+    int removee = strstr(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )[-b/-f]
     int copyy = strstr(string_inpu,"copystr--file");
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
@@ -784,10 +920,10 @@ void check() // after adrress  comes space for seperating word
     {
         cat_func() ;
     }
-    // else if(removee)
-    // {
-    //     remove_func() ;
-    // }
+    else if(removee)
+    {
+        remove_func() ;
+    }
     // else if(copyy)
     // {
     //     copy_func() ;
