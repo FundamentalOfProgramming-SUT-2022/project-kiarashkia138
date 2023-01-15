@@ -1,1 +1,1 @@
-adding func becouse of changes
+remove func
