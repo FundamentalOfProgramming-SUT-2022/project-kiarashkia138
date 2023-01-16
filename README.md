@@ -1,1 +1,1 @@
-remove func
+find function
