@@ -15,6 +15,7 @@ char string_inpu[MAX_line] ;
 char filename[MAX_line] ; // filename 
 char dir[MAX_line] ;
 char user_str[MAX_line] ; // user string input
+char clipboard[MAX_line] ; // clipboard
 char format[10] ; // format of last file for undo 
 int end = 1,char_pos = 0; // char_pos use for where the next start
 
@@ -490,6 +491,11 @@ void remove_func()
     FILE* file = fopen(filename,"r") ;
     FILE* new = fopen(dir,"w") ;
 
+    if(file == NULL)
+    {
+        error(2) ; 
+        return ;
+    }
     char_pos++ ; // after space
     while(string_inpu[char_pos] != ' ')
     {
@@ -604,6 +610,441 @@ void remove_func()
     fclose(new) ;
     remove(filename) ;
     rename(dir ,filename) ;
+}
+
+// copy
+void copy_func()
+{
+    bringefilename(13) ;
+    
+    
+    FILE* file = fopen(filename,"r") ;
+
+    char_pos++ ; // after space
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+
+    char_pos ++ ; // after space
+    int line = into_num(char_pos) ;
+
+    char_pos ++ ;
+    int pos = into_num(char_pos) ;
+
+    char_pos ++ ;
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+
+    char_pos ++ ; // after space
+    int size = into_num(char_pos) ;
+
+    char_pos += 2 ;
+    char c ;
+    int now_line = 1;
+    int now_pos = 0;
+    int i = 0;
+    char temp[MAX_line] ;
+    int temp_i[MAX_line] = {0} ;
+    memset(clipboard,0,MAX_line) ;
+
+    if(string_inpu[char_pos] == 'b')
+    {
+        while((c = fgetc(file)) != EOF)
+        {
+            temp[i] = c ;
+            if(now_line == line && now_pos == pos)
+            {
+                temp_i[i-1] = 1;
+                temp_i[i-size] = 1;
+            }
+            if(c == '\n')
+            {
+                now_line++ ;
+                now_pos = 0 ;
+            }
+            else
+                now_pos++ ;
+            i++ ;
+        }
+        temp[i] = '\0' ;
+        int max = i ;
+        int dob = 0 ;
+        int j = 0;
+        for(i = 0; i < max ;i++)
+        {
+            if(temp_i[i] == 1 )
+            {   
+                dob++ ;
+                dob %= 2 ;
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+            else if(dob == 1)
+            {
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+        }
+    } 
+
+    else if(string_inpu[char_pos] == 'f')
+    {
+        while((c = fgetc(file)) != EOF)
+        {
+            temp[i] = c ;
+            if(now_line == line && now_pos == pos)
+            {
+                temp_i[i] = 1;
+                temp_i[i+size-1] = 1;
+            }
+            if(c == '\n')
+            {
+                now_line++ ;
+                now_pos = 0 ;
+            }
+            else
+                now_pos++ ;
+            i++ ;
+        }
+        temp[i] = '\0' ;
+        int max = i ;
+        int dob = 0 ;
+        int j = 0 ;
+        for(i = 0; i < max ;i++)
+        {
+            if(temp_i[i] == 1 )
+            {   
+                dob++ ;
+                dob %= 2 ;
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+        
+            else if(dob == 1)
+            {
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+        }
+    }
+
+    else
+    {
+        fclose(file) ;
+        return ;
+    }
+    
+    fclose(file) ;
+}
+
+// cut
+void cut_func()
+{
+    bringefilename(12) ;
+    save_for_undo() ;
+    find_dir() ;
+
+    strcat(dir,"tempforcut") ;
+    strcat(dir,format) ;
+
+    FILE* file = fopen(filename,"r") ;
+    FILE* new = fopen(dir,"w") ;
+
+    if(file == NULL)
+    {
+        error(2) ; 
+        return ;
+    }
+    char_pos++ ; // after space
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+    char_pos ++ ; // after space
+    int line = into_num(char_pos) ;
+    char_pos ++ ;
+
+    int pos = into_num(char_pos) ;
+    char_pos ++ ;
+
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+    char_pos ++ ; // after space
+    int size = into_num(char_pos) ;
+
+    char_pos += 2 ;
+
+    char c ;
+    int now_line = 1;
+    int now_pos = 0;
+    int i = 0;
+    char temp[MAX_line] ;
+    int temp_i[MAX_line] = {0} ;
+    memset(clipboard,0,MAX_line) ;
+
+    if(string_inpu[char_pos] == 'b')
+    {
+        while((c = fgetc(file)) != EOF)
+        {
+            temp[i] = c ;
+            if(now_line == line && now_pos == pos)
+            {
+                temp_i[i-1] = 1;
+                temp_i[i-size] = 1;
+            }
+            if(c == '\n')
+            {
+                now_line++ ;
+                now_pos = 0 ;
+            }
+            else
+                now_pos++ ;
+            i++ ;
+        }
+        temp[i] = '\0' ;
+        int max = i ;
+        int dob = 0 ;
+        int j = 0;
+        for(i = 0; i < max ;i++)
+        {
+            if(temp_i[i] == 1 )
+            {   
+                dob++ ;
+                dob %= 2 ;
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+            else if(dob == 1)
+            {
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+            else if(dob == 0)
+            {
+                fputc(temp[i] ,new) ;
+            }
+        }
+    }
+    else if(string_inpu[char_pos] == 'f')
+    {
+        while((c = fgetc(file)) != EOF)
+        {
+            temp[i] = c ;
+            if(now_line == line && now_pos == pos)
+            {
+                temp_i[i] = 1;
+                temp_i[i+size-1] = 1;
+            }
+            if(c == '\n')
+            {
+                now_line++ ;
+                now_pos = 0 ;
+            }
+            else
+                now_pos++ ;
+            i++ ;
+        }
+        temp[i] = '\0' ;
+        int max = i ;
+        int dob = 0 ;
+        int j = 0 ;
+        for(i = 0; i < max ;i++)
+        {
+            if(temp_i[i] == 1 )
+            {   
+                dob++ ;
+                dob %= 2 ;
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+            else if(dob == 1)
+            {
+                clipboard[j] = temp[i] ;
+                j++ ;
+            }
+            else if(dob == 0)
+            {
+                fputc(temp[i] ,new) ;
+            }
+        }
+    }
+    else 
+    {
+        fclose(file) ;
+        fclose(new) ;
+        error(5) ;
+        return ;
+    }
+
+    // printf("line : %d , pos : %d , size : %d , type : %d\n",*(line),*(pos),size,type) ;
+
+    fclose(file) ;
+    fclose(new) ;
+    remove(filename) ;
+    rename(dir ,filename) ;
+}
+
+// paste
+void paste_func()
+{
+    bringefilename(14) ;
+    save_for_undo() ;
+    find_dir() ;
+
+    strcat(dir,"tempforpaste") ;
+    strcat(dir,format) ;
+
+    FILE* file = fopen(filename,"r") ;
+    FILE* new = fopen(dir,"w") ;
+
+    if(file == NULL)
+    {
+        error(2) ; 
+        return ;
+    }
+    char_pos++ ; // after space
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+    char_pos ++ ; // after space
+    int line = into_num(char_pos) ;
+    char_pos ++ ;
+
+    int pos = into_num(char_pos) ;
+    
+    int corrent_line = 1 ;
+    int corrent_pos = 0 ;
+    bool keep_reading = true ;
+    char buffer[MAX_line] ;
+    while(keep_reading)
+    {
+        memset(buffer, 0, sizeof(buffer));
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            if(corrent_line == line)
+            {
+                for(int k = 0; k < pos ; k++)
+                {
+                    fprintf(new,"%c",buffer[k]);
+                }
+                // fprintf(new,"%s",user_str) ;
+                 for (int l = 0 ; l < strlen(clipboard) ; l++)
+                {
+                    if(clipboard[l] == '\\')
+                    {
+                        if(clipboard[l+1] == '\\')
+                        {
+                            if(clipboard[l+2] == 'n')
+                            {
+                                fprintf(new,"\\n") ;
+                                l += 2 ;
+                            }
+                            else if(clipboard[l+2] == 't')
+                            {
+                                fprintf(new,"\\t") ;
+                                l += 2 ;
+                            }
+                        }
+                        else if(clipboard[l+1] == 'n')
+                        {
+                            fprintf(new,"\n") ;
+                            l++ ;
+                        }
+                        else if(clipboard[l+1] == 't')
+                        {
+                            fprintf(new,"\t") ;
+                            l++ ;
+                        }
+                        else
+                        {
+                            fprintf(new,"\\") ;
+                        }
+                    }
+                    else
+                    {
+                        fprintf(new,"%c",clipboard[l]) ;
+                    }
+                }
+                int k = pos;
+                while(buffer[k] != '\0' )
+                {
+                    fprintf(new,"%c",buffer[k]) ;
+                    k++ ;
+                }
+            }
+            else 
+                fputs(buffer,new) ;
+        }
+        else if(corrent_line == line)
+        {
+            for(int k = 0; k < pos ; k++)
+            {
+                fprintf(new,"%c",buffer[k]);
+            }
+            // fprintf(new,"%s",user_str) ;
+            for (int l = 0 ; l < strlen(clipboard) ; l++)
+                {
+                    if(clipboard[l] == '\\')
+                    {
+                        if(clipboard[l+1] == '\\')
+                        {
+                            if(clipboard[l+2] == 'n')
+                            {
+                                fprintf(new,"\\n") ;
+                                l += 2 ;
+                            }
+                            else if(clipboard[l+2] == 't')
+                            {
+                                fprintf(new,"\\t") ;
+                                l += 2 ;
+                            }
+                        }
+                        else if(clipboard[l+1] == 'n')
+                        {
+                            fprintf(new,"\n") ;
+                            l++ ;
+                        }
+                        else if(clipboard[l+1] == 't')
+                        {
+                            fprintf(new,"\t") ;
+                            l++ ;
+                        }
+                        else
+                        {
+                            fprintf(new,"\\") ;
+                        }
+                    }
+                    else
+                    {
+                        fprintf(new,"%c",clipboard[l]) ;
+                    }
+                }
+            int k = pos;
+            while(buffer[k] != '\0' )
+            {
+                fprintf(new,"%c",buffer[k]) ;
+                k++ ;
+            }
+        }
+        else
+        {
+            fputs(buffer,new) ;
+        }
+        corrent_line++ ;
+    }
+
+    fclose(file);
+    fclose(new);
+    remove(filename) ;
+    rename(dir,filename) ;
 }
 
 // find
@@ -917,18 +1358,18 @@ void check() // after adrress  comes space for seperating word
     {
         remove_func() ;
     }
-    // else if(copyy)
-    // {
-    //     copy_func() ;
-    // }
-    // else if(cutt)
-    // {
-    //     cut_func() ;
-    // }
-    // else if(pastee)
-    // {
-    //     paste_func() ;
-    // }
+    else if(copyy)
+    {
+        copy_func() ;
+    }
+    else if(cutt)
+    {
+        cut_func() ;
+    }
+    else if(pastee)
+    {
+        paste_func() ;
+    }
     else if(findd)
     {
         find_func() ;
