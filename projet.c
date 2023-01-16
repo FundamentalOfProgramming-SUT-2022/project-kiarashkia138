@@ -155,9 +155,9 @@ int find_options()
         else if(at) return 2 ;
         else if(byword) return 3 ;
         else if(all) return 10 ;
-        else return 0 ;
+        else return -1 ;
     }
-    else return -1 ;
+    else return 0 ;
 }
 
 
@@ -270,6 +270,16 @@ void error(int number)
             break;
         case 5:
             printf("Error...! Invalid input.\n") ;
+            break;
+        case 6:
+            printf("Error...! count and all can not come together.\n") ;
+            break;
+        case 7:
+            printf("Error...! at and all can not come together.\n") ;
+            break;
+        case 8:
+            printf("not found.\n") ;
+            break;
     }
 }
 
@@ -1145,7 +1155,35 @@ void string_che(char buffer [] , int* pos, bool* find)
         }
     }
 }
+// while ((fgets(buffer,MAX_line, file)) != NULL)
+//         {
+//             *(pos) = 0 ;
+//             string_che(buffer, pos,find) ;
+//             if(*(find))
+//             {
+//                 num_pos += *(pos) ;
+//                 break;
+//             }
+//             else
+//                 num_pos += *(pos) ;
+//         }
 
+//         if(user_str[0] == '*')
+//         {
+//             while((c = fgetc(file)) != EOF)
+//             {
+
+//                 pos++ ;
+//             }
+//         }
+//         else if(user_str[len-1] == '*' && user_str[len-2] == '\\')
+//         {
+
+//         }
+//         else
+//         {
+
+//         }
 
 void find_func() // start from 10 // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
 {
@@ -1161,24 +1199,145 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     char buffer[MAX_line] ;
     int first_find_op = find_options() ;
     int num_pos = 0; 
-    bool* find = (bool*)malloc(sizeof(bool)); 
-    int* pos = (int*)malloc(sizeof(int));
-    *(find) = false;
-    *(pos) = 0 ;
+    // bool* find = (bool*)malloc(sizeof(bool)); 
+    // int* pos = (int*)malloc(sizeof(int));
+    // *(find) = false;
+    // *(pos) = 0 ;
+    int pos = 0 ;
+    int i = 0;
+    int temp_pos = 0 ;
+    bool find = false ;
+    int count = 0 ;
+    char c ;
+    int len = strlen(user_str) - 1 ;
 
     if(first_find_op == 0) // no other options
     {
-        while ((fgets(buffer,MAX_line, file)) != NULL)
+        if(user_str[0] == '*')
         {
-            *(pos) = 0 ;
-            string_che(buffer, pos,find) ;
-            if(*(find))
+            count = 1;
+            i = 1 ;
+            while((c = fgetc(file)) != EOF)
             {
-                num_pos += *(pos) ;
-                break;
+                if(i == len+1 && count == len+1)
+                {
+                    if(c == ' ' || c == '\0' || c == '\n')
+                    {
+                        pos++ ;
+                        find = true ;
+                        break;
+                    } 
+                    count = 1 ;
+                    i = 1 ;    
+                }
+                if(c == ' ')
+                {
+                    pos = temp_pos ;
+                }
+                if(c == user_str[i])
+                {
+                    count++ ;
+                    i++ ;
+                }
+                else
+                {
+                    count = 1 ;
+                    i = 1 ;
+                }
+                temp_pos++ ;
             }
-            else
-                num_pos += *(pos) ;
+        }
+        else if(user_str[len] == '*' && user_str[len-1] != '\\')
+        {
+            char c ;
+            int flag = 0 ;
+
+            while((c = fgetc(file)) != EOF)
+            {
+                if(user_str[i] == '\\' && user_str[i+1] == '*')
+                {
+                    i++ ;
+                    count++ ;
+                }
+
+                if(flag == 1 && c == user_str[i])
+                {
+                    count++ ;
+                    i++ ;
+                }
+                else if(flag == 1 && c != user_str[i])
+                {
+                    count = 0 ;
+                    i = 0 ;
+                    flag = 0 ;
+                }
+                else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                {
+                    flag = 1;
+                    count = 0 ;
+                    i = 0 ;
+                }
+                pos ++ ;
+                if(count == len)
+                {
+                    pos -= len ;
+                    find = true ;
+                    break ;
+                }
+            }
+        }
+        else
+        {
+            char c ;
+            int flag = 0 ;
+            int came = 0 ;
+            len++ ;
+
+            while((c = fgetc(file)) != EOF)
+            {
+                if(user_str[i] == '\\' && user_str[i+1] == '*')
+                {
+                    i++ ;
+                    count++ ;
+                }
+
+                if(flag == 1 && c == user_str[i])
+                {
+                    count++ ;
+                    i++ ;
+                }
+                else if(flag == 1 && c != user_str[i])
+                {
+                    count = 0 ;
+                    i = 0 ;
+                    flag = 0 ;
+                }
+                else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                {
+                    flag = 1;
+                    count = 0 ;
+                    i = 0 ;
+                }
+                temp_pos ++ ;
+
+                if(count == len && came == 0)
+                {
+                    pos = temp_pos - len ;
+                    came = 1 ;
+                    flag = 0 ;
+                }
+                else if(came == 1 && flag == 1)
+                {
+                    find = true ;
+                    break ;
+                }
+                else if (came == 1 && flag == 0)
+                {
+                    came = 0 ;
+                    count = 0 ;
+                    i = 0 ;
+                }
+            }
         }
     }
     
@@ -1186,46 +1345,109 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     {
         if(find_options() == 10) // with all 
         {
-            
+            error(6) ; // all and count can come together
         }
         else
         {
-            
+            if(user_str[0] == '*')
+            {
+                
+            }
+            else if(user_str[len-1] == '*' && user_str[len-2] == '\\')
+            {
+
+            }
+            else
+            {
+
+            }
         }
     }
+
     else if(first_find_op == 2) // at
     {
         if(find_options() == 10) // with all 
         {
-            
+            error(7) ;
         }
         else
         {
             
         }
     }
-    else if(first_find_op == 3)//byword
+
+    else if(first_find_op == 3) //byword
     {
         if(find_options() == 10) // with all 
         {
-            
+            char buffer[MAX_line] ;
+            int pointer = 0;
+            int loop;
+            int position[MAX_line] ;
+            char ch ;
+            do 
+            {
+                ch = fscanf(file, "%s", buffer); 
+                if(strcmp(buffer, user_str) == 0)
+                    {
+                    position[count] = pointer;     
+                    count++;
+                    }
+                pointer++;     
+            } while (ch != EOF); 
+
+            if(count == 0)  
+                error(8) ;
+            else
+            {
+                for(loop = 0; loop<count; loop++)
+                {
+                    printf("%d ", (position[loop]+1));
+                    if(loop != count-1)
+                        printf(",");
+                }
+                printf("\n");
+            }
         }
         else
         {
-            
+            char buffer[MAX_line] ;
+            int pointer = 0;
+            int loop;
+            int position[MAX_line] ;
+            char ch ;
+            do 
+            {
+                ch = fscanf(file, "%s", buffer); 
+                if(strcmp(buffer, user_str) == 0)
+                    {
+                    position[count] = pointer;     
+                    count++;
+                    }
+                pointer++;     
+            } while (ch != EOF); 
+
+            if(count == 0)  
+                error(8) ;
+            else
+            {
+                printf("%d\n", (position[0]+1));
+            }
         }
     }
+
     else if(first_find_op == 10) // all
     {
         
     }
+
     else
     {
         error(5) ;
     }
 
-    if(*(find)) print_std_i(num_pos) ;
-    else print_std("Not Found\n") ;
+    if(find) print_std_i(pos) ;
+    else print_std_i(-1) ;
     fclose(file) ;
 }
 
