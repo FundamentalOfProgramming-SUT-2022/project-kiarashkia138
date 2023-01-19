@@ -1058,133 +1058,6 @@ void paste_func()
 }
 
 // find
-// wild
-void string_che(char buffer [] , int* pos, bool* find)
-{
-    int len_buf = strlen(buffer) ;
-    int len_user = strlen(user_str); 
-    int count = 0, nege = 1;
-    if(user_str[0] == '*')
-    {
-        for(int i = 0 ; i < len_buf ; i++)
-        {
-            for (int j = 1; j < len_user; j++)
-            {
-                if(user_str[j] == '\\' && user_str[j+1] == '*')
-                {
-                    j++;
-                    nege++ ;
-                    if(user_str[j] == buffer[i+j-nege])
-                        count++ ;
-                    else
-                        break;
-                }
-                else if(user_str[j] == buffer[i+j-nege])
-                {
-                    count++;
-                }
-                else 
-                    break;
-            }
-            // printf("count : %d , nege : %d\n",count,nege);
-            if(count >= (len_user-nege) && (buffer[i+len_user-nege] == ' ' || buffer[i+len_user-nege] == '\n' || buffer[i+len_user-nege] == '\0'))
-            {
-                while(buffer[*(pos)] != ' ')
-                {
-                    if(*(pos) == 0)
-                    {
-                        *(pos) -= 1 ;
-                        break;
-                    }
-                    *(pos) -= 1 ;
-                }
-                *(pos) += 1 ;
-                *(find) = true ;
-                return ;
-            }
-            *(pos) += 1 ;
-            count = 0 ;
-            nege = 1;
-        }
-    }
-    else
-    {
-        nege = 0;
-        for(int i = 0 ; i < len_buf ; i++)
-        {
-            if(buffer[i-1] == ' ' || i == 0)
-            {
-                for (int j = 0; j < len_user; j++)
-                {
-                    if(user_str[j] == '\\' && user_str[j+1] == '*')
-                    {
-                        j++;
-                        nege++;
-                        if(user_str[j] == buffer[i+j-nege])
-                            count++ ;
-                        else
-                            break;
-                    }
-                    else if(buffer[i+j-nege] == user_str[j])
-                    {
-                        count++ ;
-                    }
-                    else 
-                        break;
-                }
-                if(user_str[len_user-1] == '*' && user_str[len_user-2] != '\\')
-                {
-                    nege++ ;
-                }
-                else
-                {
-                    count-- ;
-                    if(buffer[i+len_user-nege] == ' ' || buffer[i+len_user-nege] == '\n' || buffer[i+len_user-nege] == '\0') 
-                        count++ ;
-
-                }
-                if(count >= len_user-nege)
-                {
-                    *(find) = true ;
-                    return ;
-                }
-            }
-            count = 0;
-            *(pos) += 1 ;
-            nege = 0 ;
-        }
-    }
-}
-// while ((fgets(buffer,MAX_line, file)) != NULL)
-//         {
-//             *(pos) = 0 ;
-//             string_che(buffer, pos,find) ;
-//             if(*(find))
-//             {
-//                 num_pos += *(pos) ;
-//                 break;
-//             }
-//             else
-//                 num_pos += *(pos) ;
-//         }
-
-//         if(user_str[0] == '*')
-//         {
-//             while((c = fgetc(file)) != EOF)
-//             {
-
-//                 pos++ ;
-//             }
-//         }
-//         else if(user_str[len-1] == '*' && user_str[len-2] == '\\')
-//         {
-
-//         }
-//         else
-//         {
-
-//         }
-
 void find_func() // start from 10 // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
 {
     char_pos = 0;
@@ -1199,19 +1072,17 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     char buffer[MAX_line] ;
     int first_find_op = find_options() ;
     int num_pos = 0; 
-    // bool* find = (bool*)malloc(sizeof(bool)); 
-    // int* pos = (int*)malloc(sizeof(int));
-    // *(find) = false;
-    // *(pos) = 0 ;
     int pos = 0 ;
     int i = 0;
     int temp_pos = 0 ;
     bool find = false ;
+    int option = 0 ;
     int count = 0 ;
+    int cnt = 0 ; // for count 
     char c ;
     int len = strlen(user_str) - 1 ;
 
-    if(first_find_op == 0) // no other options
+    if(first_find_op == 0) // no other options 
     {
         if(user_str[0] == '*')
         {
@@ -1225,12 +1096,13 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                     {
                         pos++ ;
                         find = true ;
+                        option =  0; 
                         break;
                     } 
                     count = 1 ;
                     i = 1 ;    
                 }
-                if(c == ' ')
+                if(c == ' ' || c == '\n')
                 {
                     pos = temp_pos ;
                 }
@@ -1249,7 +1121,6 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
         }
         else if(user_str[len] == '*' && user_str[len-1] != '\\')
         {
-            char c ;
             int flag = 0 ;
 
             while((c = fgetc(file)) != EOF)
@@ -1282,13 +1153,13 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                 {
                     pos -= len ;
                     find = true ;
+                    option =  0;
                     break ;
                 }
             }
         }
         else
         {
-            char c ;
             int flag = 0 ;
             int came = 0 ;
             len++ ;
@@ -1329,6 +1200,7 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                 else if(came == 1 && flag == 1)
                 {
                     find = true ;
+                    option =  0;
                     break ;
                 }
                 else if (came == 1 && flag == 0)
@@ -1346,107 +1218,758 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
         if(find_options() == 10) // with all 
         {
             error(6) ; // all and count can come together
+            return;
         }
         else
         {
             if(user_str[0] == '*')
             {
-                
+                count = 1;
+                i = 1 ;
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(i == len+1 && count == len+1)
+                    {
+                        if(c == ' ' || c == '\0' || c == '\n')
+                        {
+                            pos++ ;
+                            find = true ;
+                            option = 1 ;
+                            cnt++ ;
+                        } 
+                        count = 1 ;
+                        i = 1 ;    
+                    }
+                    if(c == ' ' || c == '\n')
+                    {
+                        pos = temp_pos ;
+                    }
+                    if(c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else
+                    {
+                        count = 1 ;
+                        i = 1 ;
+                    }
+                    temp_pos++ ;
+                }
             }
-            else if(user_str[len-1] == '*' && user_str[len-2] == '\\')
+            else if(user_str[len] == '*' && user_str[len-1] != '\\')
             {
+                int flag = 0 ;
 
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                    pos ++ ;
+                    if(count == len)
+                    {
+                        pos -= len ;
+                        find = true ;
+                        option =  1;
+                        cnt++ ;
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                }
             }
             else
             {
+                int flag = 0 ;
+                int came = 0 ;
+                len++ ;
 
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                    temp_pos ++ ;
+
+                    if(count == len && came == 0)
+                    {
+                        pos = temp_pos - len ;
+                        came = 1 ;
+                        flag = 0 ;
+                    }
+                    else if(came == 1 && flag == 1)
+                    {
+                        find = true ;
+                        option =  1;
+                        i = 0 ;
+                        count = 0 ;
+                        flag = 1 ;
+                        cnt++ ;
+                        came = 0 ;
+                    }
+                    else if (came == 1 && flag == 0)
+                    {
+                        came = 0 ;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                }
             }
         }
     }
 
     else if(first_find_op == 2) // at
     {
+        // find n
+        char_pos ++ ;
+        int n_at = into_num(char_pos) ;
+
         if(find_options() == 10) // with all 
         {
             error(7) ;
+            return;
         }
         else
         {
-            
+            if(user_str[0] == '*')
+            {
+                count = 1;
+                i = 1 ;
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(i == len+1 && count == len+1)
+                    {
+                        if(c == ' ' || c == '\0' || c == '\n')
+                        {
+                            pos++ ;
+                            cnt++ ;
+                            if(cnt == n_at)
+                            {
+                                find = true ;
+                                option = 2 ;
+                                break;
+                            }
+                        } 
+                        count = 1 ;
+                        i = 1 ;    
+                    }
+                    if(c == ' ' || c == '\n')
+                    {
+                        pos = temp_pos ;
+                    }
+                    if(c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else
+                    {
+                        count = 1 ;
+                        i = 1 ;
+                    }
+                    temp_pos++ ;
+                }
+            }
+            else if(user_str[len] == '*' && user_str[len-1] != '\\')
+            {
+                int flag = 0 ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                    pos ++ ;
+                    if(count == len)
+                    {
+                        cnt++ ;
+                        if(cnt == n_at)
+                        {
+                            pos -= len ;
+                            find = true ;
+                            option =  2;
+                            break ;
+                        }
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                }
+            }
+            else
+            {
+                int flag = 0 ;
+                int came = 0 ;
+                len++ ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                    temp_pos ++ ;
+
+                    if(count == len && came == 0)
+                    {
+                        pos = temp_pos - len ;
+                        came = 1 ;
+                        flag = 0 ;
+                    }
+                    else if(came == 1 && flag == 1)
+                    {
+                        cnt++ ;
+                        if(cnt == n_at)
+                        {
+                            find = true ;
+                            option =  2;
+                            break ;
+                        }
+                        i = 0 ;
+                        count = 0 ;
+                        flag = 1 ;
+                        came = 0 ;
+                    }
+                    else if (came == 1 && flag == 0)
+                    {
+                        came = 0 ;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                }
+            }
         }
     }
 
     else if(first_find_op == 3) //byword
     {
+        int cnt_camma = 0 ;
+        cnt = 1 ;
         if(find_options() == 10) // with all 
         {
-            char buffer[MAX_line] ;
-            int pointer = 0;
-            int loop;
-            int position[MAX_line] ;
-            char ch ;
-            do 
+            if(user_str[0] == '*')
             {
-                ch = fscanf(file, "%s", buffer); 
-                if(strcmp(buffer, user_str) == 0)
-                    {
-                    position[count] = pointer;     
-                    count++;
-                    }
-                pointer++;     
-            } while (ch != EOF); 
-
-            if(count == 0)  
-                error(8) ;
-            else
-            {
-                for(loop = 0; loop<count; loop++)
+                count = 1;
+                i = 1 ;
+                while((c = fgetc(file)) != EOF)
                 {
-                    printf("%d ", (position[loop]+1));
-                    if(loop != count-1)
-                        printf(",");
+                    if(i == len+1 && count == len+1)
+                    {
+                        if(c == ' ' || c == '\0' || c == '\n')
+                        {
+                            find = true ;
+                            option = 3 ;
+                            if(cnt_camma) printf(",");
+                            printf("%d ",cnt);
+                            cnt_camma = 1;
+                        } 
+                        count = 1 ;
+                        i = 1 ;    
+                    }
+                    if(c == ' ' || c == '\n')
+                    {
+                        cnt++ ;
+                    }
+                    if(c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else
+                    {
+                        count = 1 ;
+                        i = 1 ;
+                    }
                 }
-                printf("\n");
+            }
+            else if(user_str[len] == '*' && user_str[len-1] != '\\')
+            {
+                int flag = 0 ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        cnt++ ;
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+
+                    if(count == len)
+                    {
+                        find = true ;
+                        option =  3;
+                        if(cnt_camma) printf(",");
+                        printf("%d ",cnt) ;
+                        cnt_camma = 1; 
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                }
+            }
+            else 
+            {
+                int flag = 0 ;
+                int came = 0 ;
+                len++ ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                        cnt++ ;
+                    }
+                    temp_pos ++ ;
+
+                    if(count == len && came == 0)
+                    {
+                        came = 1 ;
+                        flag = 0 ;
+                    }
+                    else if(came == 1 && flag == 1)
+                    {
+                        find = true ;
+                        option =  3;
+                        if(cnt_camma) printf(",");
+                        printf("%d ",cnt) ;
+                        cnt_camma = 1;
+                        i = 0 ;
+                        count = 0 ;
+                        flag = 1 ;
+                        came = 0 ;
+                    }
+                    else if (came == 1 && flag == 0)
+                    {
+                        came = 0 ;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                }
             }
         }
         else
         {
-            char buffer[MAX_line] ;
-            int pointer = 0;
-            int loop;
-            int position[MAX_line] ;
-            char ch ;
-            do 
+            if(user_str[0] == '*')
             {
-                ch = fscanf(file, "%s", buffer); 
-                if(strcmp(buffer, user_str) == 0)
+                count = 1;
+                i = 1 ;
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(i == len+1 && count == len+1)
                     {
-                    position[count] = pointer;     
-                    count++;
+                        if(c == ' ' || c == '\0' || c == '\n')
+                        {
+                            find = true ;
+                            option = 3 ; 
+                            printf("%d",cnt);
+                            break ;
+                            cnt_camma = 1;
+                        } 
+                        count = 1 ;
+                        i = 1 ;    
                     }
-                pointer++;     
-            } while (ch != EOF); 
-
-            if(count == 0)  
-                error(8) ;
-            else
+                    if(c == ' ' || c == '\n')
+                    {
+                        cnt++ ;
+                    }
+                    if(c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else
+                    {
+                        count = 1 ;
+                        i = 1 ;
+                    }
+                }
+            }
+            else if(user_str[len] == '*' && user_str[len-1] != '\\')
             {
-                printf("%d\n", (position[0]+1));
+                int flag = 0 ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        cnt++ ;
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+
+                    if(count == len)
+                    {
+                        find = true ;
+                        option =  3;
+                        printf("%d",cnt) ;
+                        break;
+                        cnt_camma = 1; 
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                }
+            }
+            else 
+            {
+                int flag = 0 ;
+                int came = 0 ;
+                len++ ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                        cnt++ ;
+                    }
+                    temp_pos ++ ;
+
+                    if(count == len && came == 0)
+                    {
+                        came = 1 ;
+                        flag = 0 ;
+                    }
+                    else if(came == 1 && flag == 1)
+                    {
+                        find = true ;
+                        option =  3;
+                        printf("%d",cnt) ;
+                        break;
+                        cnt_camma = 1;
+                        i = 0 ;
+                        count = 0 ;
+                        flag = 1 ;
+                        came = 0 ;
+                    }
+                    else if (came == 1 && flag == 0)
+                    {
+                        came = 0 ;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                }
             }
         }
     }
 
     else if(first_find_op == 10) // all
     {
-        
+        int cnt_camma = 0 ;
+
+        if(user_str[0] == '*')
+        {
+            count = 1;
+            i = 1 ;
+            while((c = fgetc(file)) != EOF)
+            {
+                if(i == len+1 && count == len+1)
+                {
+                    if(c == ' ' || c == '\0' || c == '\n')
+                    {
+                        pos++ ;
+                        find = true ;
+                        option =  4;
+                        if(cnt_camma) printf(",") ; 
+                        printf("%d ",pos);
+                        cnt_camma = 1 ;
+                    } 
+                    count = 1 ;
+                    i = 1 ;    
+                }
+                if(c == ' ' || c == '\n')
+                {
+                    pos = temp_pos ;
+                }
+                if(c == user_str[i])
+                {
+                    count++ ;
+                    i++ ;
+                }
+                else
+                {
+                    count = 1 ;
+                    i = 1 ;
+                }
+                temp_pos++ ;
+            }
+        }
+        else if(user_str[len] == '*' && user_str[len-1] != '\\')
+        {
+            int flag = 0 ;
+
+            while((c = fgetc(file)) != EOF)
+            {
+                if(user_str[i] == '\\' && user_str[i+1] == '*')
+                {
+                    i++ ;
+                    count++ ;
+                }
+
+                if(flag == 1 && c == user_str[i])
+                {
+                    count++ ;
+                    i++ ;
+                }
+                else if(flag == 1 && c != user_str[i])
+                {
+                    count = 0 ;
+                    i = 0 ;
+                    flag = 0 ;
+                }
+                else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                {
+                    flag = 1;
+                    count = 0 ;
+                    i = 0 ;
+                }
+                pos ++ ;
+                if(count == len)
+                {
+                    if(cnt_camma == 0)pos -= len ;
+                    find = true ;
+                    option =  4;
+                    if(cnt_camma) printf(",");
+                    cnt_camma = 1 ;
+                    printf("%d ", pos) ;
+                    count = 0 ;
+                    i = 0 ;
+                    flag = 0 ;
+                }
+            }
+        }
+        else
+            {
+                int flag = 0 ;
+                int came = 0 ;
+                len++ ;
+
+                while((c = fgetc(file)) != EOF)
+                {
+                    if(user_str[i] == '\\' && user_str[i+1] == '*')
+                    {
+                        i++ ;
+                        count++ ;
+                    }
+
+                    if(flag == 1 && c == user_str[i])
+                    {
+                        count++ ;
+                        i++ ;
+                    }
+                    else if(flag == 1 && c != user_str[i])
+                    {
+                        count = 0 ;
+                        i = 0 ;
+                        flag = 0 ;
+                    }
+                    else if(flag == 0 && (c == ' ' || c == '\n' || c == '\0'))
+                    {
+                        flag = 1;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                    temp_pos ++ ;
+
+                    if(count == len && came == 0)
+                    {
+                        pos = temp_pos - len ;
+                        came = 1 ;
+                        flag = 0 ;
+                    }
+                    else if(came == 1 && flag == 1)
+                    {
+                        find = true ;
+                        option =  4;
+                        if(cnt_camma) printf(",");
+                        printf("%d ",pos) ;
+                        cnt_camma = 1 ;
+                        i = 0 ;
+                        count = 0 ;
+                        flag = 1 ;
+                        came = 0 ;
+                    }
+                    else if (came == 1 && flag == 0)
+                    {
+                        came = 0 ;
+                        count = 0 ;
+                        i = 0 ;
+                    }
+                }
+            }
     }
 
     else
     {
         error(5) ;
+        return;
     }
 
-    if(find) print_std_i(pos) ;
+    if(find)
+    {
+        if(option == 0) print_std_i(pos) ;
+        else if(option == 1) print_std_i(cnt) ;
+        else if(option == 2) print_std_i(pos) ;
+        else if(option == 3) print_std("\n") ;
+        else if(option == 4) print_std("\n") ;
+        else error(3) ;
+    }
     else print_std_i(-1) ;
     fclose(file) ;
 }
