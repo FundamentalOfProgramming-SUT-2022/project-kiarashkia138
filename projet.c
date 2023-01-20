@@ -13,6 +13,7 @@
 
 char string_inpu[MAX_line] ;
 char filename[MAX_line] ; // filename 
+char name_of_file[MAX_line] ; 
 char dir[MAX_line] ;
 char user_str[MAX_line] ; // user string input
 char clipboard[MAX_line] ; // clipboard
@@ -134,6 +135,47 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
 }
 
 
+void find_next_str3() // for grep
+{
+    int i = 0 ;
+    memset(user_str, 0, sizeof(user_str));
+
+    while(string_inpu[char_pos] != '\0')
+    {
+        if(string_inpu[char_pos] == '"')
+        {
+            if(string_inpu[char_pos+1] == ' ')
+            {
+                if(string_inpu[char_pos+2] == '-')
+                {
+                    if(string_inpu[char_pos+3] == '-')
+                    {
+                        if(string_inpu[char_pos+4] == 'f')
+                        {
+                            if(string_inpu[char_pos+5] == 'i')
+                            {
+                                if(string_inpu[char_pos+6] == 'l')
+                                {
+                                    if(string_inpu[char_pos+7] == 'e')
+                                    {
+                                        user_str[i] = '\0' ;
+                                        char_pos++ ;
+                                        return ;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        user_str[i] = string_inpu[char_pos] ;
+        i++;
+        char_pos++ ;
+    }
+}
+
+
 int find_options()
 {
     if(string_inpu[char_pos] == ' ')
@@ -183,6 +225,26 @@ void find_dir()
         }
         temp[j] = filename[i] ;
         if(conti) strcat(dir,temp) ;
+        i++ ;
+    }
+}
+
+
+void find_name_file()
+{
+    memset(name_of_file,0,sizeof(name_of_file)) ;
+    int last = strlen(filename) - 1 ;
+    int first = strlen(filename) - 1 ;
+    
+    while(filename[first] != '/')
+    {
+        first-- ;
+    }
+    first++ ;
+    int i = 0 ;
+    for(first ; first <= last ; first++)
+    {
+        name_of_file[i] = filename[first] ;
         i++ ;
     }
 }
@@ -1974,6 +2036,154 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     fclose(file) ;
 }
 
+// grep
+void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/root/test.txt --file/root/test.txt ...
+{
+    char_pos = 6 ;
+    int len = strlen(string_inpu);
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+
+    if(string_inpu[char_pos] == '-') // none
+    {
+        char_pos = 12 ; // first of string
+        find_next_str3() ;
+        char_pos += 7 ; // after file
+
+        while(char_pos < len)
+        {
+            bringefilename(char_pos);
+            FILE* file = fopen(filename ,"r") ;
+            if(file == NULL)
+            {
+                error(2) ;
+                return ;
+            }
+
+            find_name_file() ;
+
+            keep_reading = true ;
+            while(keep_reading)
+            {
+                memset(buffer,0,sizeof(buffer));
+                fgets(buffer,MAX_line,file) ;
+                if(feof(file))
+                {
+                    keep_reading = false ;
+                    if(strstr(buffer,user_str))
+                    {
+                        printf("%s: %s\n",name_of_file,buffer); 
+                    }
+                }
+                else 
+                {
+                    if(strstr(buffer,user_str))
+                    {
+                        printf("%s: %s",name_of_file,buffer); 
+                    }
+                }
+            }
+
+            fclose(file) ;
+            char_pos += 7 ;
+        }
+    }
+    else if(string_inpu[char_pos] == 'c') // count
+    {
+        int cnt = 0 ;
+        char_pos = 15 ; // first of string
+        find_next_str3() ;
+        char_pos += 7 ; // after file
+
+        while(char_pos < len)
+        {
+            bringefilename(char_pos);
+            FILE* file = fopen(filename ,"r") ;
+            if(file == NULL)
+            {
+                error(2) ;
+                return ;
+            }
+
+            keep_reading = true ;
+            while(keep_reading)
+            {
+                memset(buffer,0,sizeof(buffer));
+                fgets(buffer,MAX_line,file) ;
+                if(feof(file))
+                {
+                    keep_reading = false ;
+                    if(strstr(buffer,user_str))
+                    {
+                        cnt++;
+                    }
+                }
+                else 
+                {
+                    if(strstr(buffer,user_str))
+                    {
+                        cnt++; 
+                    }
+                }
+            }
+
+            fclose(file) ;
+            char_pos += 7 ;
+        }
+
+        if(cnt == 0) error(8) ;
+        else print_std_i(cnt) ;
+    }
+    else if(string_inpu[char_pos] == 'l') // file name
+    {
+        char_pos = 15 ; // first of string
+        find_next_str3() ;
+        char_pos += 7 ; // after file
+
+        while(char_pos < len)
+        {
+            bringefilename(char_pos);
+            FILE* file = fopen(filename ,"r") ;
+            if(file == NULL)
+            {
+                error(2) ;
+                return ;
+            }
+
+            find_name_file() ;
+
+            keep_reading = true ;
+            while(keep_reading)
+            {
+                memset(buffer,0,sizeof(buffer));
+                fgets(buffer,MAX_line,file) ;
+                if(feof(file))
+                {
+                    keep_reading = false ;
+                    if(strstr(buffer,user_str))
+                    {
+                        printf("%s\n",name_of_file); 
+                        break;
+                    }
+                }
+                else 
+                {
+                    if(strstr(buffer,user_str))
+                    {
+                        printf("%s\n",name_of_file); 
+                        break;
+                    }
+                }
+            }
+
+            fclose(file) ;
+            char_pos += 7 ;
+        }
+    }
+    else
+        error(5);
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -2082,6 +2292,7 @@ void check() // after adrress  comes space for seperating word
     int copyy = strstr(string_inpu,"copystr--file");
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
+    int grepp = strstr(string_inpu,"grep");
     
     if(create)
     {
@@ -2119,7 +2330,10 @@ void check() // after adrress  comes space for seperating word
     {
         find_func() ;
     }
-
+    else if(grepp)
+    {
+        grep_func() ;
+    }
     else if(eenndd)
         end = 0 ;
     else
