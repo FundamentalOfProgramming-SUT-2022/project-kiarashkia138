@@ -134,6 +134,114 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
 }
 
 
+void find_next_str2(char str1[],int type)
+{
+    int i = 0;
+    if(type == 1) // bring what is between ""
+    {
+        while(string_inpu[char_pos] != '"')
+        {
+            char_pos ++ ;
+        }
+        char_pos++;
+        int first_pos = char_pos ;
+        
+        while(string_inpu[char_pos] != '\0')
+        {
+            if(string_inpu[char_pos] == '"')
+            {
+                if(string_inpu[char_pos+1] == ' ')
+                {
+                    if(string_inpu[char_pos+2] == '-')
+                    {
+                        if(string_inpu[char_pos+3] == '-')
+                        {
+                            if(string_inpu[char_pos+4] == 's')
+                            {
+                                if(string_inpu[char_pos+5] == 't')
+                                {
+                                    if(string_inpu[char_pos+6] == 'r')
+                                    {
+                                        if(string_inpu[char_pos+7] == '2')
+                                        {
+                                            if(string_inpu[char_pos+8] == ' ')
+                                            {
+                                                char_pos++;
+                                                str1[i] = '\0' ;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        else if(string_inpu[char_pos+3] == 'a')
+                        {
+                            if(string_inpu[char_pos+4] == 'l')
+                            {
+                                if(string_inpu[char_pos+5] == 'l')
+                                {
+                                    if(string_inpu[char_pos+6] == '\0')
+                                    {
+                                        char_pos++;
+                                        str1[i] = '\0' ;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if(string_inpu[char_pos+4] == 't')
+                            {
+                                char_pos++;
+                                str1[i] = '\0' ;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if(string_inpu[char_pos+1] == '\0')
+                {
+                    str1[i] = '\0' ;
+                    return;
+                }
+            }
+
+            str1[i] = string_inpu[char_pos] ;
+            i++ ;
+            char_pos += 1 ;
+        }
+        // char_pos will be on space 
+    }
+    // else if(type == 2)  // use after --str -->> += 7
+    // {
+    //     char_pos += 7 ;
+    //     if(string_inpu[char_pos] == '"') find_next_str(1) ;
+    //     else 
+    //     {
+    //         char_pos -= 7 ;
+    //         find_next_str(0) ;
+    //     }
+    // }
+    else
+    {
+        char_pos++ ;
+        while(string_inpu[char_pos] != ' ')
+        {
+            char_pos++ ;
+        }
+        char_pos++ ;
+        int i = 0;
+        while(string_inpu[char_pos] != ' ')
+        {
+            str1[i] = string_inpu[char_pos] ;
+            i++ ;
+            char_pos++;
+        }
+        // char pos will be in space
+    }
+}
+
+
 int find_options()
 {
     if(string_inpu[char_pos] == ' ')
@@ -1974,6 +2082,164 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     fclose(file) ;
 }
 
+//replace
+void replace_func()
+{
+    bringefilename(13) ;
+    save_for_undo();
+    find_dir(); 
+
+    strcat(dir,"tempforreplace") ;
+    strcat(dir,format) ;
+
+    FILE* file = fopen(filename,"r") ;
+    if(file == NULL)
+    {
+        error(2) ; 
+        return ;
+    }
+
+    FILE* new = fopen(dir,"w") ;
+
+    char_pos++ ; // after space
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+
+    char str1[MAX_line] ;
+    char str2[MAX_line] ;
+
+    find_next_str2(str1,1);
+    find_next_str2(str2,1);
+
+    int len = strlen(str1) - 1;
+    int len2 = strlen(str2);
+
+    int op = find_options() ;
+    
+    int pos = 0 ;
+    int temp_pos = 0 ;
+    char temp[MAX_line] ;
+    int i = 0 , j = 0;
+    bool find = false ;
+    int count = 0 ;
+    int cnt = 0 ; // for count 
+    char c ;
+
+
+    // printf("str1 : %s--\nstr2 : %s--\nop : %d--\n", str1, str2,op) ;
+    if(op == 0)
+    {
+        if(str1[0] == '*')
+        {
+            
+        }
+        else if(str1[len] == '*' && str1[len-1] != '\\')
+        {
+           
+        }
+        else
+        {
+
+        }
+    }
+    else if(op == 10)
+    {
+        if(str1[0] == '*')
+        {
+            count = 1;
+            i = 1 ;
+            while((c = fgetc(file)) != EOF)
+            {
+                if(i == len+1 && count == len+1)
+                {
+                    if(c == ' ' || c == '\0' || c == '\n')
+                    {
+                        if(c == '\n')fputc(c,new) ;
+                        find = true ;
+                        fputs(str2,new) ;
+                        memset(temp,0,sizeof(temp)) ;
+                        j = 0 ;
+                    } 
+                    count = 1 ;
+                    i = 1 ;    
+                }
+                if(c == ' ' || c == '\n' || c == '\0')
+                {
+                    // if(c == ' ')temp[j] = c ;
+                    fputs(temp,new) ;
+                    memset(temp,0,sizeof(temp)) ;
+                    j = 0 ;
+                }
+                if(c == str1[i])
+                {
+                    count++ ;
+                    i++ ;
+                    temp[j] = c ;
+                    j++ ;
+                }
+                else
+                {
+                    temp[j] = c ;
+                    j++ ;
+                    count = 1 ;
+                    i = 1 ;
+                }
+            }
+            if(i == len+1 && count == len+1)
+            {
+                find = true ;
+                for(int j = 0; j < strlen(temp) - len; j++)
+                {
+                    fputc(temp[j],new) ;
+                }
+                fputs(str2,new) ;
+            }
+            else 
+                fputs(temp,new) ;
+        }
+        else if(str1[len] == '*' && str1[len-1] != '\\')
+        {
+           
+        }
+        else
+        {
+
+        }
+    }
+    else if(op == 2)
+    {
+        char_pos ++ ;
+        int n_at = into_num(char_pos) ;
+        if(str1[0] == '*')
+        {
+           
+        }
+        else if(str1[len] == '*' && str1[len-1] != '\\')
+        {
+           
+        }
+        else
+        {
+
+        }
+    }
+    else
+    {
+        error(5) ;
+        return ;
+    }
+    
+
+
+
+    fclose(file) ;
+    fclose(new) ;
+    remove(filename) ;
+    rename(dir ,filename) ;
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -2082,6 +2348,7 @@ void check() // after adrress  comes space for seperating word
     int copyy = strstr(string_inpu,"copystr--file");
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
+    int replacee = strstr(string_inpu,"replace--file"); // replace--file/root/test.txt( )--str1( )"something"( )--str2( )"something"( )[-all/-at n]
     
     if(create)
     {
@@ -2119,7 +2386,10 @@ void check() // after adrress  comes space for seperating word
     {
         find_func() ;
     }
-
+    else if(replacee)
+    {
+        replace_func() ;
+    }
     else if(eenndd)
         end = 0 ;
     else
