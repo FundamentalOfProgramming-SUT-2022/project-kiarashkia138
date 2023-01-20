@@ -1,1 +1,1 @@
-grep function
+auto indent
