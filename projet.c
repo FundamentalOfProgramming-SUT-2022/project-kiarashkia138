@@ -550,7 +550,7 @@ void cat_func() // start from 9
     fclose(file) ;
 }
 
-// remove
+// remove 
 void remove_func()
 {
     bringefilename(15) ;
@@ -2184,6 +2184,168 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
         error(5);
 }
 
+//auto indent
+void auto_func() // start from 17
+{
+    bringefilename(17) ;
+    save_for_undo() ;
+    find_dir() ;
+
+    strcat(dir,"tempforindent") ;
+    strcat(dir,format) ;
+
+    FILE* file = fopen(filename,"r") ;
+
+    if(file == NULL)
+    {
+        error(2) ; 
+        return ;
+    }
+    FILE* new = fopen(dir,"w") ;
+
+    char buffer[MAX_line] ;
+    int tabb = 0 ;
+    int came = 0 , first = 0 ;
+    int i = 0 ;
+    bool keep_reading = true ;
+
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,file) ;
+        if(feof(file))
+        {
+            keep_reading = false ;
+            while(buffer[i] != '\0')
+            {
+                if(first == 1)
+                {
+                    for(int j = 0 ; j < tabb ; j++)
+                    {
+                        fputc('\t',new) ;
+                    }
+                    first = 0 ;
+                }
+
+                if(buffer[i] == '{')
+                {
+                    if(buffer[i-1] != ' ')
+                    {
+                        fputc(' ',new) ;
+                    }
+                    fputc(buffer[i],new) ;
+                    fputc('\n',new) ;
+                    tabb++ ;
+                    came = 1 ;
+                    first = 1 ;
+                }
+                else if(buffer[i] == '}')
+                {
+                    tabb-- ;
+                    int check = 1 ;
+                    int k = i ;
+                    while(buffer[k] != '}')
+                    {
+                        if(buffer[k] != ' ')
+                        {
+                            check = 0 ;
+                            break;
+                        }
+                        k++ ;
+                    }
+                    fputc('\n',new) ;
+                    for(int j = 0 ; j < tabb ; j++)
+                    {
+                        fputc('\t',new) ;
+                    }
+                    fputc(buffer[i],new) ;
+                    if(!check) fputc('\n',new) ;
+                    first = 1 ;
+                    came = 0 ;
+                }
+                else if(buffer[i] == ' ' && came == 1)
+                {
+                    came = 1 ;
+                }
+                else
+                {
+                    came = 0 ;
+                    fputc(buffer[i],new) ;
+                }
+
+                i++ ;
+            }
+        }
+        else 
+        {
+            while(buffer[i] != '\0')
+            {
+                if(first == 1)
+                {
+                    for(int j = 0 ; j < tabb ; j++)
+                    {
+                        fputc('\t',new) ;
+                    }
+                    first = 0 ;
+                }
+
+                if(buffer[i] == '{')
+                {
+                    if(buffer[i-1] != ' ')
+                    {
+                        fputc(' ',new) ;
+                    }
+                    fputc(buffer[i],new) ;
+                    fputc('\n',new) ;
+                    tabb++ ;
+                    came = 1 ;
+                    first = 1 ;
+                }
+                else if(buffer[i] == '}')
+                {
+                    tabb-- ;
+                    int check = 1 ;
+                    int k = i ;
+                    while(buffer[k] != '}')
+                    {
+                        if(buffer[k] != ' ')
+                        {
+                            check = 0 ;
+                            break;
+                        }
+                        k++ ;
+                    }
+                    fputc('\n',new) ;
+                    for(int j = 0 ; j < tabb ; j++)
+                    {
+                        fputc('\t',new) ;
+                    }
+                    fputc(buffer[i],new) ;
+                    if(!check) fputc('\n',new) ;
+                    first = 1 ;
+                    came = 0 ;
+                }
+                else if(buffer[i] == ' ' && came == 1)
+                {
+                    came = 1 ;
+                }
+                else
+                {
+                    came = 0 ;
+                    fputc(buffer[i],new) ;
+                }
+
+                i++ ;
+            }
+        }
+    }
+
+    fclose(file);
+    fclose(new);
+    remove(filename) ;
+    rename(dir,filename);
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -2293,6 +2455,7 @@ void check() // after adrress  comes space for seperating word
     int cutt = strstr(string_inpu,"cutstr--file");
     int pastee = strstr(string_inpu,"pastestr--file");
     int grepp = strstr(string_inpu,"grep");
+    int autoo = strstr(string_inpu,"auto-indent--file");
     
     if(create)
     {
@@ -2333,6 +2496,10 @@ void check() // after adrress  comes space for seperating word
     else if(grepp)
     {
         grep_func() ;
+    }
+    else if(autoo)
+    {
+        auto_func() ;
     }
     else if(eenndd)
         end = 0 ;
