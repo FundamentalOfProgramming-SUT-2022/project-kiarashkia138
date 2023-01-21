@@ -79,6 +79,63 @@ void bringefilename(int start) // will create directory // start positin is ( " 
 }
 
 
+void bringefilename2 (char filename2[] ,int start)
+{
+    memset(filename2,0,sizeof(filename2)) ;
+
+    int temp_cnt = 0;
+    int cnt_dir = 0;
+    if(string_inpu[start] == '"')
+    {
+        start += 2; // after slash 
+        char_pos = start ;
+        while(string_inpu[start] != '"')
+        {
+            if(string_inpu[start] != '/')
+                filename2[temp_cnt] = string_inpu[start] ;
+            else if(string_inpu[start] == '/' && cnt_dir == 0)
+            {
+                cnt_dir++ ;
+                filename2[temp_cnt] = string_inpu[start] ;
+            }
+            else if (string_inpu[start] == '/' && cnt_dir > 0)
+            {
+                filename2[temp_cnt] = string_inpu[start] ;
+            }
+            start ++ ;
+            temp_cnt ++ ;
+            char_pos ++ ;
+        }
+        char_pos ++ ;
+    }
+
+    else
+    {
+        start++ ; // after slash
+        char_pos = start ;
+        while(string_inpu[start] != '\0' && string_inpu[start] != ' ' && string_inpu[start] != '\n' ) //  && string_inpu[start] != '-'
+        {
+            if(string_inpu[start] != '/')
+                filename2[temp_cnt] = string_inpu[start] ;
+            else if(string_inpu[start] == '/' && cnt_dir == 0)
+            {
+                cnt_dir++ ;
+                filename2[temp_cnt] = string_inpu[start] ;
+            }
+            else if (string_inpu[start] == '/' && cnt_dir > 0)
+            {
+                // CreateDirectory (filename, NULL);
+                filename2[temp_cnt] = string_inpu[start] ;
+            }
+            start ++ ;
+            temp_cnt ++ ;
+            char_pos ++ ;
+        }
+    }
+    filename2[temp_cnt] = '\0' ;
+}
+
+
 void find_next_str(int type) // char_pos = pos of space // type for having(1) or not having(0) or both(2) "
 {
     // not usefull for replace 
@@ -172,6 +229,17 @@ void find_next_str3() // for grep
         user_str[i] = string_inpu[char_pos] ;
         i++;
         char_pos++ ;
+    }
+}
+
+
+void copy_str(char buffer[] ,char save_buffer[][100] ,int col)
+{
+    int len = strlen(buffer);
+
+    for(int i = 0; i < len; i++)
+    {
+        save_buffer[i][col] = buffer[i];
     }
 }
 
@@ -2346,6 +2414,162 @@ void auto_func() // start from 17
     rename(dir,filename);
 }
 
+// compare
+void compare_func() // start from 13
+{
+    char_pos = 13 ;
+    bringefilename(char_pos) ;
+    
+    char_pos += 7 ;
+    char filename2[MAX_line] ;
+    bringefilename2(filename2,char_pos) ;
+
+    FILE* file = fopen(filename,"r");
+    FILE* file2 = fopen(filename2,"r");
+    if(file == NULL || file2 == NULL)
+    {
+        error(2) ;
+        return ;
+    }
+
+    int line1 = 1 ;
+    int line2 = 1 ;
+    char buffer1[MAX_line] ;
+    char buffer2[MAX_line] ;
+
+    int which_first = 0 ;
+    bool keep_reading = true ;
+
+    while(!which_first)
+    {
+        memset(buffer1,0,sizeof(buffer1));
+        memset(buffer2,0,sizeof(buffer2));
+
+        fgets(buffer1,MAX_line,file) ;
+        fgets(buffer2,MAX_line,file2) ;
+
+        if(feof(file))
+        {
+            which_first = 2 ; // i shouid print from file2
+            if(strcmp(buffer1,buffer2) != 0)
+            {
+                printf("============ #%d ============\n" ,line1) ;
+                print_std(buffer1);
+                // print_std("\n");
+                print_std(buffer2);
+                print_std("\n");
+            }
+
+            if(feof(file2))
+                which_first = 3 ;
+        }
+        else if(feof(file2))
+        {
+            which_first = 1 ;
+            if(strcmp(buffer1,buffer2) != 0)
+            {
+                printf("============ #%d ============\n" ,line1) ;
+                print_std(buffer1);
+                // print_std("\n");
+                print_std(buffer2);
+                print_std("\n");
+            }
+
+            if(feof(file))
+                which_first = 3 ;
+        }
+        else
+        {
+            if(strcmp(buffer1,buffer2) != 0)
+            {
+                printf("============ #%d ============\n" ,line1) ;
+                print_std(buffer1);
+                // print_std("\n");
+                print_std(buffer2);
+                print_std("\n");
+            }
+        }
+        line1 ++;
+        line2 ++;
+    }
+
+    int save_line ;
+    int col = 0;
+    char save_buffer[MAX_line][100] ;
+
+    if(which_first == 1)
+    {
+        save_line = line1 ;
+        while(keep_reading)
+        {
+            memset(buffer1,0,sizeof(buffer1));
+            fgets(buffer1,MAX_line,file) ;
+
+            if(feof(file))
+            {
+                keep_reading = false ;
+                copy_str(buffer1,save_buffer,col) ;
+                col++ ;
+            }
+            else
+            {
+                copy_str(buffer1,save_buffer,col) ;
+                col++ ;
+            }
+            line1 ++;
+        }
+
+        printf("<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<\n",save_line ,(line1-1)) ;
+        for(int i = 0 ; i < col ; i++)
+        {
+            int j = 0 ;
+            while(save_buffer[j][i] != '\0')
+            {
+                printf("%c", save_buffer[j][i]);
+                j++ ;
+            }
+        }
+        printf("\n");
+    }
+    else if(which_first == 2)
+    {
+        save_line = line2 ;
+        while(keep_reading)
+        {
+            memset(buffer2,0,sizeof(buffer2));
+            fgets(buffer2,MAX_line,file2) ;
+
+            if(feof(file2))
+            {
+                keep_reading = false ;
+                copy_str(buffer2,save_buffer,col) ;
+                col++ ;
+            }
+            else
+            {
+                copy_str(buffer2,save_buffer,col) ;
+                col++ ;
+            }
+            line2 ++;
+        }
+        printf(">>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>\n",save_line ,(line2-1)) ;
+        for(int i = 0 ; i < col ; i++)
+        {
+            int j = 0 ;
+            while(save_buffer[j][i] != '\0')
+            {
+                printf("%c", save_buffer[j][i]);
+                j++ ;
+            }
+        }
+        printf("\n");
+    }
+
+
+    fclose(file) ;
+    fclose(file2) ;
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -2456,6 +2680,7 @@ void check() // after adrress  comes space for seperating word
     int pastee = strstr(string_inpu,"pastestr--file");
     int grepp = strstr(string_inpu,"grep");
     int autoo = strstr(string_inpu,"auto-indent--file");
+    int comparee = strstr(string_inpu,"compare--file");
     
     if(create)
     {
@@ -2500,6 +2725,10 @@ void check() // after adrress  comes space for seperating word
     else if(autoo)
     {
         auto_func() ;
+    }
+    else if(comparee)
+    {
+        compare_func() ;
     }
     else if(eenndd)
         end = 0 ;
