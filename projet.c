@@ -2229,7 +2229,7 @@ void auto_func() // start from 17
 
                 if(buffer[i] == '{')
                 {
-                    if(buffer[i-1] != ' ')
+                    if(buffer[i-1] != ' ' && buffer[i-1] != '{' && buffer[i-1] != '}' && i-1 >= 0)
                     {
                         fputc(' ',new) ;
                     }
@@ -2291,7 +2291,7 @@ void auto_func() // start from 17
 
                 if(buffer[i] == '{')
                 {
-                    if(buffer[i-1] != ' ')
+                    if(buffer[i-1] != ' ' && buffer[i-1] != '{' && buffer[i-1] != '}' && i-1 >= 0)
                     {
                         fputc(' ',new) ;
                     }
