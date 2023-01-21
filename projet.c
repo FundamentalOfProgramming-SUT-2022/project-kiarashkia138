@@ -6,6 +6,7 @@
 #include <dir.h>
 #include <process.h>
 #include <stdbool.h>
+#include <dirent.h>
 
 
 # define MAX_line 2048 
@@ -320,6 +321,13 @@ void find_name_file()
 
 long long int into_num(int i ) // i is position of start
 {
+    int flag = 0 ;
+    if(string_inpu[i] == '-')
+    {
+        flag = 1 ;
+        i++ ;
+        char_pos ++ ;
+    }
     
     long long ret = 0 ;
     while (string_inpu[i] != ':' && string_inpu[i] != '-' && string_inpu[i] != ' ' && string_inpu[i] != '\n' && string_inpu[i] != '\0')
@@ -378,7 +386,8 @@ long long int into_num(int i ) // i is position of start
         i++ ;
         char_pos++ ; 
     }
-    return ret;
+    if(flag == 0)return ret;
+    else return (-1*ret) ;
 }
 
 
@@ -409,6 +418,12 @@ void error(int number)
             break;
         case 8:
             printf("not found.\n") ;
+            break;
+        case 9:
+            printf("invalid depth.\n") ;
+            break;
+        case 10:
+            printf("Could not open current directory.\n") ;
             break;
     }
 }
@@ -2570,6 +2585,101 @@ void compare_func() // start from 13
     fclose(file2) ;
 }
 
+// tree
+void tree_func()
+{
+    char_pos = 5 ;
+    int depth = into_num(char_pos) ;
+    
+    if(depth == -1 || depth == 2)
+    {
+        struct dirent *de;
+        DIR *dr = opendir(".");
+    
+        if (dr == NULL)
+        {
+            error(10) ;
+            return 0;
+        }
+        int i = 0 ;
+        int first = 0 ;
+        int cnt = 0 ;
+        int tabb = 0 ;
+        
+        while ((de = readdir(dr)) != NULL)
+        {
+            i = 1 ;
+            cnt = 0 ;
+
+            char *temp = de->d_name ;
+            if(!strstr(temp ,"."))
+            {
+                
+                printf("%s\n",temp);
+                struct dirent *de2;
+
+                DIR *dr2 = opendir(temp);
+                if (dr2 == NULL) 
+                {
+                    error(10) ;
+                    return 0;
+                }
+
+                while ((de2 = readdir(dr2)) != NULL)
+                {
+                    cnt++ ;
+                }
+                closedir(dr2);
+
+                DIR *dr3 = opendir(temp);
+
+                while ((de2 = readdir(dr3)) != NULL)
+                {
+                    char *temp2 = de2->d_name ;
+                    if(i < cnt)
+                    {
+                        printf("|---");
+                    }
+                    else
+                    {
+                        printf("L---");
+                    }
+                    i++ ;
+                    printf("%s\n",temp2);
+                }
+                closedir(dr3);
+            }
+            else
+            {
+                printf("%s\n",temp);
+            }
+        }
+    
+        closedir(dr); 
+    }
+    else if(depth == 1)
+    {
+        struct dirent *de;
+        DIR *dr = opendir(".");
+    
+        if (dr == NULL)
+        {
+            error(10);
+            return 0;
+        }
+
+        while ((de = readdir(dr)) != NULL)
+        {
+            char *temp = de->d_name ;
+            printf("%s\n", temp);
+        }
+    }
+    else
+    {
+        error(9) ;
+    }
+}
+
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
@@ -2681,7 +2791,8 @@ void check() // after adrress  comes space for seperating word
     int grepp = strstr(string_inpu,"grep");
     int autoo = strstr(string_inpu,"auto-indent--file");
     int comparee = strstr(string_inpu,"compare--file");
-    
+    int treee = strstr(string_inpu,"tree");
+
     if(create)
     {
         create_func();
@@ -2729,6 +2840,10 @@ void check() // after adrress  comes space for seperating word
     else if(comparee)
     {
         compare_func() ;
+    }
+    else if(treee)
+    {
+        tree_func() ;
     }
     else if(eenndd)
         end = 0 ;
