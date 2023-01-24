@@ -157,12 +157,19 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
         last_pos-- ;
         for (char_pos; char_pos <= last_pos; char_pos++ )
         {
-            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == 'n')
+            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
             {
                 char_pos++;
                 first_pos ++ ;
-                string_inpu[char_pos] = '\n' ;
+                // string_inpu[char_pos] = '\n' ;
             } 
+            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            {
+                user_str[char_pos - first_pos] = string_inpu[char_pos] ;
+                char_pos += 2;
+                first_pos ++;
+                string_inpu[char_pos] = '\n' ;
+            }
             user_str[char_pos - first_pos] = string_inpu[char_pos] ;
         }
         char_pos += 1 ;
@@ -189,12 +196,136 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
         int i = 0;
         while(string_inpu[char_pos] != ' ' && string_inpu[char_pos] != '\0')
         {
-            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == 'n')
+            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
             {
                 char_pos++;
-                string_inpu[char_pos] = '\n' ;
             } 
+            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            {
+                user_str[i] = string_inpu[char_pos] ;
+                char_pos += 2;
+                i++ ;
+                string_inpu[char_pos] = '\n' ;
+            }
             user_str[i] = string_inpu[char_pos] ;
+            i++ ;
+            char_pos++;
+        }
+        // char pos will be in space
+    }
+}
+
+
+void find_next_str2(char str1[],int type)
+{
+    int i = 0;
+    if(type == 1) // bring what is between ""
+    {
+        while(string_inpu[char_pos] != '"')
+        {
+            char_pos ++ ;
+        }
+        char_pos++;
+        int first_pos = char_pos ;
+        
+        while(string_inpu[char_pos] != '\0')
+        {
+            if(string_inpu[char_pos] == '"')
+            {
+                if(string_inpu[char_pos+1] == ' ')
+                {
+                    if(string_inpu[char_pos+2] == '-')
+                    {
+                        if(string_inpu[char_pos+3] == '-')
+                        {
+                            if(string_inpu[char_pos+4] == 's')
+                            {
+                                if(string_inpu[char_pos+5] == 't')
+                                {
+                                    if(string_inpu[char_pos+6] == 'r')
+                                    {
+                                        if(string_inpu[char_pos+7] == '2')
+                                        {
+                                            if(string_inpu[char_pos+8] == ' ')
+                                            {
+                                                char_pos++;
+                                                str1[i] = '\0' ;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        else if(string_inpu[char_pos+3] == 'a')
+                        {
+                            if(string_inpu[char_pos+4] == 'l')
+                            {
+                                if(string_inpu[char_pos+5] == 'l')
+                                {
+                                    if(string_inpu[char_pos+6] == '\0')
+                                    {
+                                        char_pos++;
+                                        str1[i] = '\0' ;
+                                        break;
+                                    }
+                                }
+                            }
+                            else if(string_inpu[char_pos+4] == 't')
+                            {
+                                char_pos++;
+                                str1[i] = '\0' ;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if(string_inpu[char_pos+1] == '\0')
+                {
+                    str1[i] = '\0' ;
+                    return;
+                }
+            }
+            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            {
+                char_pos++;
+            }
+            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            {
+                str1[i] = string_inpu[char_pos] ;
+                char_pos += 2 ;
+                i++ ;
+                string_inpu[char_pos] = '\n' ;
+            }
+            str1[i] = string_inpu[char_pos] ;
+            i++ ;
+            char_pos += 1 ;
+        }
+        // char_pos will be on space 
+    }
+    // else if(type == 2)  // use after --str -->> += 7
+    // {
+    //     char_pos += 7 ;
+    //     if(string_inpu[char_pos] == '"') find_next_str(1) ;
+    //     else 
+    //     {
+    //         char_pos -= 7 ;
+    //         find_next_str(0) ;
+    //     }
+    // }
+    else
+    {
+        char_pos++ ;
+        while(string_inpu[char_pos] != ' ')
+        {
+            char_pos++ ;
+        }
+        char_pos++ ;
+        int i = 0;
+        while(string_inpu[char_pos] != ' ')
+        {
+            str1[i] = string_inpu[char_pos] ;
             i++ ;
             char_pos++;
         }
@@ -252,6 +383,19 @@ void copy_str(char buffer[] ,char save_buffer[][100] ,int col)
     {
         save_buffer[i][col] = buffer[i];
     }
+}
+
+
+void copy_str2(char buffer[][100],int col , char secound[],char c)
+{
+    int i = 0 ;
+    while(secound[i] != '\0')
+    {
+        buffer[i][col] = secound[i] ;
+        i++ ;
+    }
+    buffer[i][col] = c ;
+    buffer[i+1][col] = '\0' ;
 }
 
 
@@ -1213,59 +1357,6 @@ void paste_func()
     rename(dir,filename) ;
 }
 
-// compare two words
-bool strmatch(char str[], char pattern[][100], int n, int m,int col)
-{
-    // empty pattern can only match with
-    // empty string
-    if (m == 0)
-        return (n == 0);
- 
-    // lookup table for storing results of
-    // subproblems
-    bool lookup[n + 1][m + 1];
- 
-    // initialize lookup table to false
-    memset(lookup, false, sizeof(lookup));
- 
-    // empty pattern can match with empty string
-    lookup[0][0] = true;
- 
-    // Only '*' can match with empty string
-    for (int j = 1; j <= m; j++)
-        if (pattern[j - 1][col] == '*')
-            lookup[0][j] = lookup[0][j - 1];
- 
-    // fill the table in bottom-up fashion
-    for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= m; j++) {
-            // Two cases if we see a '*'
-            // a) We ignore ‘*’ character and move
-            //    to next  character in the pattern,
-            //     i.e., ‘*’ indicates an empty sequence.
-            // b) '*' character matches with ith
-            //     character in input
-            if (pattern[j - 1][col] == '*')
-                lookup[i][j]
-                    = lookup[i][j - 1] || lookup[i - 1][j];
- 
-            // Current characters are considered as
-            // matching in two cases
-            // (a) current character of pattern is '?'
-            // (b) characters actually match
-            else if (pattern[j - 1][col] == '?'
-                     || str[i - 1] == pattern[j - 1][col])
-                lookup[i][j] = lookup[i - 1][j - 1];
- 
-            // If characters don't match
-            else
-                lookup[i][j] = false;
-        }
-    }
- 
-    return lookup[n][m];
-}
-
 // comp
 int comp(char word1[][100], char word2[],int col) // word2 is the bigger one
 {
@@ -1373,6 +1464,7 @@ int comp(char word1[][100], char word2[],int col) // word2 is the bigger one
             }
         }
     }
+    return 0 ;
 }
 
 // find
@@ -1484,10 +1576,36 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                 temp_pos ++ ;
                 i++;
             }
-            i = 0 ;
-            j = 0 ;
             if(find)
                 break;
+
+            if(!keep_reading)
+            {
+                if(count == 0)
+                {
+                    save_pos = pos ;
+                    pos = temp_pos+1 ;
+                }
+
+                temp[j] = '\0' ; 
+                int l = 0 ;
+
+                if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                {
+                    col++ ;
+                    k++ ;
+                    count++ ;
+                    if(count == word_cnt)
+                    {
+                        find = true ;
+                        option = 1 ;
+                        break;
+                    }   
+                }
+            }
+
+            i = 0 ;
+            j = 0 ;
         }
     }
     
@@ -1555,6 +1673,33 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                     }
                     temp_pos ++ ;
                     i++;
+                }
+                if(!keep_reading)
+                {
+                    if(count == 0)
+                    {
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        col++ ;
+                        k++ ;
+                        count++ ;
+                        if(count == word_cnt)                            
+                        {
+                            find = true ;
+                            cnt++ ;
+                            option = 2 ;
+                            col = 0;
+                            k = 0;
+                            count = 0 ;
+                        }
+                    }
                 }
                 i = 0 ;
                 j = 0 ;
@@ -1635,10 +1780,42 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                     temp_pos ++ ;
                     i++;
                 }
-                i = 0 ;
-                j = 0 ;
                 if(find)
                     break;
+
+                if(!keep_reading)
+                {
+                    if(count == 0)
+                    {
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        col++ ;
+                        k++ ;
+                        count++ ;
+                        if(count == word_cnt)
+                        {
+                            cnt++ ;
+                            if(cnt == n_at)
+                            {
+                                find = true ;
+                                option = 3 ;
+                                break;
+                            }
+                            col = 0;
+                            k = 0;
+                            count = 0 ;
+                        }
+                    }
+                }
+                i = 0 ;
+                j = 0 ;
             }
         }
     }
@@ -1711,6 +1888,38 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                     temp_pos ++ ;
                     i++;
                 }
+                if(!keep_reading)
+                {
+                    count_word++ ;
+                    if(count == 0)
+                    {
+                        save_count = count_word ;
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        col++ ;
+                        k++ ;
+                        count++ ;
+                        if(count == word_cnt)
+                        {
+                            find = true ;
+                            cnt++ ;
+                            option = 4 ;
+                            if(cnt_camma) printf(",");
+                            printf("%d ",save_count);
+                            cnt_camma = 1 ;
+                            col = 0;
+                            k = 0;
+                            count = 0 ;
+                        }
+                    }
+                }
                 i = 0 ;
                 j = 0 ;
             }
@@ -1773,10 +1982,38 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                     temp_pos ++ ;
                     i++;
                 }
+                if(find)
+                    break; 
+
+                if(!keep_reading)
+                {
+                    count_word++ ;
+                    if(count == 0)
+                    {
+                        save_count = count_word ;
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        col++ ;
+                        k++ ;
+                        count++ ;
+                        if(count == word_cnt)
+                        {
+                            find = true ;
+                            cnt++ ;
+                            option = 5 ;
+                            break;
+                        }
+                    }
+                } 
                 i = 0 ;
                 j = 0 ;
-                if(find)
-                    break;  
             }
         }
     }
@@ -1842,6 +2079,35 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                 temp_pos ++ ;
                 i++;
             }
+            if(!keep_reading)
+            {
+                if(count == 0)
+                {
+                    save_pos = pos ;
+                    pos = temp_pos+1 ;
+                }
+
+                temp[j] = '\0' ; 
+                int l = 0 ;
+
+                if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                {
+                    col++ ;
+                    k++ ;
+                    count++ ;
+                    if(count == word_cnt)
+                    {
+                        find = true ;
+                        option = 4 ;
+                        if(cnt_camma) printf(",");
+                        printf("%d ",save_pos);
+                        cnt_camma = 1 ;
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                    }
+                }
+            }
             i = 0 ;
             j = 0 ;
         }
@@ -1865,6 +2131,531 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
     }
     else print_std_i(-1) ;
     fclose(file) ;
+}
+
+// replace
+void replace_func()
+{
+    bringefilename(13) ;
+    save_for_undo();
+    find_dir(); 
+
+    strcat(dir,"tempforreplace") ;
+    strcat(dir,format) ;
+
+    FILE* file = fopen(filename,"r") ;
+    if(file == NULL)
+    {
+        error(2) ; 
+        return ;
+    }
+
+    FILE* new = fopen(dir,"w") ;
+
+    char_pos++ ; // after space
+    while(string_inpu[char_pos] != ' ')
+    {
+        char_pos++;
+    }
+
+    char str1[MAX_line] ;
+    char str2[MAX_line] ;
+
+
+    find_next_str2(str1,1);
+    find_next_str2(str2,1);
+    int op = find_options() ;
+
+
+    char buffer[MAX_line] ;
+    char temp[MAX_line] ;
+    char temp_user[MAX_line][100] ;
+    char temp_user2[MAX_line][100] ;
+    char for_paste[MAX_line] ;
+    char en_sp[100] ;
+
+    bool find = false ;
+    bool keep_reading = true ;
+    int pos = 0 ,cnt = 0 , i = 0 , j = 0 , k = 0 ,col = 0;
+    int temp_pos = 0 ,word_cnt = 1, count = 0 ,save_pos = 0;
+    int save_count = 1 ;
+    int option = 0 ;
+    char check ;
+
+    while(str1[i] != '\0')
+    {
+        // printf("%c", user_str[i]) ;
+        if(str1[i] == ' ' || str1[i] == '\n')
+        {
+            word_cnt++;
+            en_sp[k] = str1[i] ;
+            temp_user[j][col] = '\0' ;
+            i++;
+            k++ ;
+            j = 0 ;
+            col++ ;
+        }
+        else
+        {
+            temp_user[j][col] = str1[i] ;
+            j++;
+            i++;
+        }
+    }
+    en_sp[k] = '\0' ;
+
+    i = 0 ;
+    j = 0 ;
+    col = 0 ;
+    k = 0 ;
+
+
+    
+    if(op == 0)
+    {
+        temp_pos = 0 ;
+        while(keep_reading)
+        {
+            memset(buffer,0,sizeof(buffer));
+            memset(temp,0,sizeof(temp));
+            fgets(buffer,MAX_line,file) ;
+            if(feof(file))
+            {
+                keep_reading = false ;
+            }
+            
+            while(buffer[i] != '\0')
+            {
+                if(buffer[i] == ' ' || buffer[i] == '\n')
+                {
+                    if(count == 0)
+                    {
+                        memset(temp_user2,0,sizeof(temp_user2));
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(find == false && comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        count++ ;
+                        copy_str2(temp_user2,col,temp,buffer[i]) ;
+                        col++ ;
+                        k++ ;
+                        if(count == word_cnt)
+                        {
+                            find = true ;
+                            fputs(str2,new);
+                            fputc(buffer[i],new) ;
+                            col = 0;
+                            k = 0;
+                            count = 0 ;
+                        }
+                    }
+                    else if(count != 0)
+                    {
+                        for(int y = 0; y < col ; y++)
+                        {
+                            memset(for_paste,0,sizeof(for_paste));
+                            int x = 0 ;
+                            while(temp_user2[x][y] != '\0')
+                            {
+                                for_paste[x] = temp_user2[x][y] ;
+                                x++ ;
+                            }
+                            fputs(for_paste,new);
+                        }
+                    }
+                    else
+                    {
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                        fputs(temp,new) ;
+                        fputc(buffer[i],new) ;
+                    }
+                    memset(temp,0,sizeof(temp));
+                    j = 0 ;
+                }
+                else
+                {
+                    temp[j] = buffer[i];
+                    j++ ;
+                }
+                temp_pos ++ ;
+                i++;
+            }
+            if(!keep_reading)
+            {
+                if(count == 0)
+                {
+                    memset(temp_user2,0,sizeof(temp_user2));
+                    save_pos = pos ;
+                    pos = temp_pos+1 ;
+                }
+
+                temp[j] = '\0' ; 
+                int l = 0 ;
+
+                if(find == false && comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                {
+                    count++ ;
+                    copy_str2(temp_user2,col,temp,buffer[i]) ;
+                    col++ ;
+                    k++ ;
+                    if(count == word_cnt)
+                    {
+                        find = true ;
+                        fputs(str2,new);
+                        fputc(buffer[i],new) ;
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                    }
+                }
+                else if(count != 0)
+                {
+                    for(int y = 0; y < col ; y++)
+                    {
+                        memset(for_paste,0,sizeof(for_paste));
+                        int x = 0 ;
+                        while(temp_user2[x][y] != '\0')
+                        {
+                            for_paste[x] = temp_user2[x][y] ;
+                            x++ ;
+                        }
+                        fputs(for_paste,new);
+                    }
+                }
+                else
+                {
+                    col = 0;
+                    k = 0;
+                    count = 0 ;
+                    fputs(temp,new) ;
+                    fputc(buffer[i],new) ;
+                }
+            }
+            i = 0 ;
+            j = 0 ;
+        }
+    }
+    else if(op == 10)
+    {
+        temp_pos = 0 ;
+        while(keep_reading)
+        {
+            memset(buffer,0,sizeof(buffer));
+            memset(temp,0,sizeof(temp));
+            fgets(buffer,MAX_line,file) ;
+            if(feof(file))
+            {
+                keep_reading = false ;
+            }
+            
+            while(buffer[i] != '\0')
+            {
+                if(buffer[i] == ' ' || buffer[i] == '\n')
+                {
+                    if(count == 0)
+                    {
+                        memset(temp_user2,0,sizeof(temp_user2));
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        copy_str2(temp_user2,col,temp,buffer[i]) ;
+                        col++ ;
+                        k++ ;
+                        count++ ;
+                        if(count == word_cnt)
+                        {
+                            find = true ;
+                            fputs(str2,new) ;
+                            fputc(buffer[i],new) ;
+                            col = 0;
+                            k = 0;
+                            count = 0 ;
+                        }
+                    }
+                    else if(count != 0)
+                    {
+                        for(int y = 0; y < col ; y++)
+                        {
+                            memset(for_paste,0,sizeof(for_paste));
+                            int x = 0 ;
+                            while(temp_user2[x][y] != '\0')
+                            {
+                                for_paste[x] = temp_user2[x][y] ;
+                                x++ ;
+                            }
+                            fputs(for_paste,new);
+                        }
+                    }
+                    else
+                    {
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                        fputs(temp,new) ;
+                        fputc(buffer[i],new) ;
+                    }
+                    memset(temp,0,sizeof(temp));
+                    j = 0 ;
+                }
+                else
+                {
+                    temp[j] = buffer[i];
+                    j++ ;
+                }
+                temp_pos ++ ;
+                i++;
+            }
+            if(!keep_reading)
+            {
+                if(count == 0)
+                {
+                memset(temp_user2,0,sizeof(temp_user2));
+                save_pos = pos ;
+                pos = temp_pos+1 ;
+                }
+
+                temp[j] = '\0' ; 
+                int l = 0 ;
+
+                if(comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                {
+                    copy_str2(temp_user2,col,temp,buffer[i]) ;
+                    col++ ;
+                    k++ ;
+                    count++ ;
+                    if(count == word_cnt)
+                    {
+                        find = true ;
+                        fputs(str2,new) ;
+                        fputc(buffer[i],new) ;
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                    }
+                }
+                else if(count != 0)
+                {
+                    for(int y = 0; y < col ; y++)
+                    {
+                        memset(for_paste,0,sizeof(for_paste));
+                        int x = 0 ;
+                        while(temp_user2[x][y] != '\0')
+                        {
+                            for_paste[x] = temp_user2[x][y] ;
+                            x++ ;
+                        }
+                        fputs(for_paste,new);
+                    }
+                }
+                else
+                {
+                    col = 0;
+                    k = 0;
+                    count = 0 ;
+                    fputs(temp,new) ;
+                    fputc(buffer[i],new) ;
+                }
+            }
+            i = 0 ;
+            j = 0 ;
+        }
+    }
+    else if(op == 2)
+    {
+        char_pos ++ ;
+        int n_at = into_num(char_pos) ;
+        temp_pos = 0 ;
+        while(keep_reading)
+        {
+            memset(buffer,0,sizeof(buffer));
+            memset(temp,0,sizeof(temp));
+            fgets(buffer,MAX_line,file) ;
+            if(feof(file))
+            {
+                keep_reading = false ;
+            }
+                
+            while(buffer[i] != '\0')
+            {
+                if(buffer[i] == ' ' || buffer[i] == '\n')
+                {
+                    if(count == 0)
+                    {
+                        memset(temp_user2,0,sizeof(temp_user2));
+                        save_pos = pos ;
+                        pos = temp_pos+1 ;
+                    }
+
+                    temp[j] = '\0' ; 
+                    int l = 0 ;
+
+                    if(find == false && comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                    {
+                        copy_str2(temp_user2,col,temp,buffer[i]) ;
+                        col++ ;
+                        k++ ;
+                        count++ ;
+                        if(count == word_cnt)
+                        {
+                            cnt++ ;
+                            if(cnt == n_at)
+                            {
+                                find = true ;
+                                fputs(str2,new) ;
+                                fputc(buffer[i],new) ;
+                            }
+                            else
+                            {
+                                for(int y = 0; y < col ; y++)
+                                {
+                                    memset(for_paste,0,sizeof(for_paste));
+                                    int x = 0 ;
+                                    while(temp_user2[x][y] != '\0')
+                                    {
+                                        for_paste[x] = temp_user2[x][y] ;
+                                        x++ ;
+                                    }
+                                    fputs(for_paste,new);
+                                }
+                            }
+                            col = 0;
+                            k = 0;
+                            count = 0 ;
+                        }
+                    }
+                    else if(count != 0)
+                    {
+                        for(int y = 0; y < col ; y++)
+                        {
+                            memset(for_paste,0,sizeof(for_paste));
+                            int x = 0 ;
+                            while(temp_user2[x][y] != '\0')
+                            {
+                                for_paste[x] = temp_user2[x][y] ;
+                                x++ ;
+                            }
+                            fputs(for_paste,new);
+                        }
+                    }
+                    else
+                    {
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                        fputs(temp,new) ;
+                        fputc(buffer[i],new) ;
+                    }
+                    memset(temp,0,sizeof(temp));
+                    j = 0 ;
+                }
+                else
+                {
+                    temp[j] = buffer[i];
+                    j++ ;
+                }
+                temp_pos ++ ;
+                i++;
+            }
+            if(!keep_reading)
+            {
+                if(count == 0)
+                {
+                    memset(temp_user2,0,sizeof(temp_user2));
+                    save_pos = pos ;
+                    pos = temp_pos+1 ;
+                }
+                temp[j] = '\0' ; 
+                int l = 0 ;
+
+                if(find == false && comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
+                {
+                    copy_str2(temp_user2,col,temp,buffer[i]) ;
+                    col++ ;
+                    k++ ;
+                    count++ ;
+                    if(count == word_cnt)
+                    {
+                        cnt++ ;
+                        if(cnt == n_at)
+                        {
+                            find = true ;
+                            fputs(str2,new) ;
+                            fputc(buffer[i],new) ;
+                        }
+                        else
+                        {
+                            for(int y = 0; y < col ; y++)
+                            {
+                                memset(for_paste,0,sizeof(for_paste));
+                                int x = 0 ;
+                                while(temp_user[x][y] != '\0')
+                                {
+                                    for_paste[x] = temp_user[x][y] ;
+                                    x++ ;
+                                }
+                                fputs(for_paste,new);
+                            }
+                        }
+                        col = 0;
+                        k = 0;
+                        count = 0 ;
+                    }
+                }
+                else if(count != 0)
+                {
+                    for(int y = 0; y < col ; y++)
+                    {
+                        memset(for_paste,0,sizeof(for_paste));
+                        int x = 0 ;
+                        while(temp_user[x][y] != '\0')
+                        {
+                            for_paste[x] = temp_user[x][y] ;
+                            x++ ;
+                        }
+                        fputs(for_paste,new);
+                    }
+                }
+                else
+                {
+                    col = 0;
+                    k = 0;
+                    count = 0 ;
+                    fputs(temp,new) ;
+                    fputc(buffer[i],new) ;
+                }
+            }
+            i = 0 ;
+            j = 0 ;
+        }
+        
+    }
+    else
+    {
+        error(5) ;
+        return ;
+    }
+
+    if(find) printf("success\n") ;
+    else printf("could not find\n") ;
+
+
+    fclose(file) ;
+    fclose(new) ;
+    remove(filename) ;
+    rename(dir ,filename) ;
 }
 
 // grep
@@ -2532,6 +3323,7 @@ void check() // after adrress  comes space for seperating word
     int undoo = strstr(string_inpu,"undo--file");
     int catt = strstr(string_inpu,"cat--file");
     int findd = strstr(string_inpu,"find--file"); // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
+    int replacee = strstr(string_inpu,"replace--file"); // replace--file/root/something( )str1( )
     int removee = strstr(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )[-b/-f]
     int copyy = strstr(string_inpu,"copystr--file");
     int cutt = strstr(string_inpu,"cutstr--file");
@@ -2576,6 +3368,10 @@ void check() // after adrress  comes space for seperating word
     else if(findd)
     {
         find_func() ;
+    }
+    else if(replacee)
+    {
+        replace_func() ;
     }
     else if(grepp)
     {
