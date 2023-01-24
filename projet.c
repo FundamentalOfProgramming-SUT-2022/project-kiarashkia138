@@ -3125,93 +3125,57 @@ void compare_func() // start from 13
 }
 
 // tree
+void tree(char *firstpath ,int depth ,int h)
+{
+    if(h == depth || depth+1 == h)
+        return ;
+
+    int i;
+    char path[1000];
+    struct dirent *dp;
+    DIR *dir = opendir(firstpath);
+
+    if (!dir)
+        return;
+
+    while ((dp = readdir(dir)) != NULL)
+    {
+        if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+        {
+            for (i = 0; i < h ; i++) 
+            {
+                if (i%2 == 0 || i == 0)
+                    printf("%c", 179);
+                else
+                    printf("\t");
+            }
+            if(strcmp(dp->d_name ,"."))
+            printf("%c%c%s\n", 195, 196, dp->d_name);
+
+            strcpy(path, firstpath);
+            strcat(path, "/");
+            strcat(path, dp->d_name);
+            tree(path, depth , h+2);
+        }
+    }
+
+    closedir(dir);
+}
+
+
 void tree_func()
 {
     char_pos = 5 ;
     int depth = into_num(char_pos) ;
     
+    char *path = "./root" ;
     if(depth == -1 || depth == 2)
     {
-        struct dirent *de;
-        DIR *dr = opendir(".");
-    
-        if (dr == NULL)
-        {
-            error(10) ;
-            return 0;
-        }
-        int i = 0 ;
-        int first = 0 ;
-        int cnt = 0 ;
-        int tabb = 0 ;
-        
-        while ((de = readdir(dr)) != NULL)
-        {
-            i = 1 ;
-            cnt = 0 ;
-
-            char *temp = de->d_name ;
-            if(!strstr(temp ,"."))
-            {
-                
-                printf("%s\n",temp);
-                struct dirent *de2;
-
-                DIR *dr2 = opendir(temp);
-                if (dr2 == NULL) 
-                {
-                    error(10) ;
-                    return 0;
-                }
-
-                while ((de2 = readdir(dr2)) != NULL)
-                {
-                    cnt++ ;
-                }
-                closedir(dr2);
-
-                DIR *dr3 = opendir(temp);
-
-                while ((de2 = readdir(dr3)) != NULL)
-                {
-                    char *temp2 = de2->d_name ;
-                    if(i < cnt)
-                    {
-                        printf("|---");
-                    }
-                    else
-                    {
-                        printf("L---");
-                    }
-                    i++ ;
-                    printf("%s\n",temp2);
-                }
-                closedir(dr3);
-            }
-            else
-            {
-                printf("%s\n",temp);
-            }
-        }
-    
-        closedir(dr); 
+        tree(path, 5,0) ;
     }
     else if(depth == 1)
     {
-        struct dirent *de;
-        DIR *dr = opendir(".");
-    
-        if (dr == NULL)
-        {
-            error(10);
-            return 0;
-        }
-
-        while ((de = readdir(dr)) != NULL)
-        {
-            char *temp = de->d_name ;
-            printf("%s\n", temp);
-        }
+        tree(path, 3,0) ;
     }
     else
     {
