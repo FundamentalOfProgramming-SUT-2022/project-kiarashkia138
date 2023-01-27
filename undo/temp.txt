@@ -1,4 +1,6 @@
 line 1
-sa kia sa kia sa replace kiani
-find smth
-end         
+line 2
+L--test.txt
+L--test2.txt
+123456789
+line 4

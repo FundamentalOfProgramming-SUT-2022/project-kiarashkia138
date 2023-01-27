@@ -726,13 +726,13 @@ void error(int number)
 
 void print_std(char* buffer)
 {
-    copy_output(buffer) ;
+    printf("%s",buffer) ;
 }
 
 
 void print_std_i(int num)
 {
-    copy_output_i(num) ;
+    printf("%d",num) ;
 }
 
 
@@ -2275,14 +2275,14 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
 
     if(find)
     {
-        if(option == 1) print_std_i(save_pos) ;
-        else if(option == 2) print_std_i(cnt) ;
-        else if(option == 3) print_std_i(save_pos) ;
-        else if(option == 4) print_std("\n") ;
-        else if(option == 5) print_std_i(save_count) ;
+        if(option == 1) copy_output_i(save_pos) ;
+        else if(option == 2) copy_output_i(cnt) ;
+        else if(option == 3) copy_output_i(save_pos) ;
+        else if(option == 4) copy_output("\n") ;
+        else if(option == 5) copy_output_i(save_count) ;
         else error(3) ;
     }
-    else print_std_i(-1) ;
+    else copy_output_i(-1) ;
     fclose(file) ;
 }
 
@@ -3293,12 +3293,9 @@ void compare_func() // start from 13
 // tree
 void tree(FILE* out ,char *firstpath ,int depth ,int h)
 {
-
     if(h == depth || depth+1 == h)
         return ;
 
-    if(strstr(firstpath,"undo"))
-        return ;
     int i;
     char path[1000];
     struct dirent *dp;
@@ -3314,13 +3311,12 @@ void tree(FILE* out ,char *firstpath ,int depth ,int h)
             for (i = 0; i < h ; i++) 
             {
                 if (i%2 == 0 || i == 0)
-                    fprintf(out,"%c", 179);
+                    fprintf(out,"|");
                 else
                     fprintf(out,"\t");
             }
             // if(strcmp(dp->d_name ,"."))
-            // if(!strstr(dp->d_name,"undo"))
-            fprintf(out,"%c%c%s\n", 195, 196, dp->d_name);
+            fprintf(out,"L--%s\n", dp->d_name);
 
             strcpy(path, firstpath);
             strcat(path, "/");
@@ -3340,17 +3336,18 @@ void tree_func()
     int depth = into_num(char_pos) ;
     
     char *path = "./root" ;
-    if(depth == -1 || depth == 2)
+    if(depth == -1)
     {
         tree(out,path, 5,0) ;
     }
-    else if(depth == 1)
+    else if(depth < -1)
     {
-        tree(out,path, 3,0) ;
+        error(9) ;
     }
     else
     {
-        error(9) ;
+        int a = 2*depth + 1 ;
+        tree(out,path, a,0) ;
     }
     fclose(out) ;
 }
@@ -3528,7 +3525,7 @@ void make_string_inpu_right(int after)
     char temp[MAX_line] ;
     char add[MAX_line] ;
 
-    printf("char_pos2 = %d\n", char_pos2) ;
+    // printf("char_pos2 = %d\n", char_pos2) ;
     while(string_inpu[j] != '\0') // start after =D( )
     {
         temp[i] = string_inpu[j] ;
@@ -3537,8 +3534,8 @@ void make_string_inpu_right(int after)
     }
     bringeafter(temp,add,after) ;
 
-    printf("temp : -%s\n",temp) ;
-    printf("add : -%s\n", add) ;
+    // printf("temp : -%s\n",temp) ;
+    // printf("add : -%s\n", add) ;
 
     memset(string_inpu,0,sizeof(string_inpu)) ;
 
@@ -3623,14 +3620,12 @@ void check() // after adrress  comes space for seperating word
                 cat_func();
                 make_string_inpu_right(15) ;
                 insert_func() ;
-                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
                 cat_func();
                 make_string_inpu_right(15) ;
                 remove_func() ;
-                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
@@ -3681,13 +3676,11 @@ void check() // after adrress  comes space for seperating word
             {
                 make_string_inpu_right(15) ;
                 insert_func() ;
-                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
                 make_string_inpu_right(15) ;
                 remove_func() ;
-                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
@@ -3720,13 +3713,11 @@ void check() // after adrress  comes space for seperating word
             {
                 make_string_inpu_right(15) ;
                 insert_func() ;
-                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
                 make_string_inpu_right(15) ;
                 remove_func() ;
-                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
@@ -3759,13 +3750,11 @@ void check() // after adrress  comes space for seperating word
             {
                 make_string_inpu_right(15) ;
                 insert_func() ;
-                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
                 make_string_inpu_right(15) ;
                 remove_func() ;
-                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
@@ -3802,13 +3791,11 @@ void check() // after adrress  comes space for seperating word
             {
                 make_string_inpu_right(15) ;
                 insert_func() ;
-                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
                 make_string_inpu_right(15) ;
                 remove_func() ;
-                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
@@ -3841,13 +3828,11 @@ void check() // after adrress  comes space for seperating word
             {
                 make_string_inpu_right(15) ;
                 insert_func() ;
-                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
                 make_string_inpu_right(15) ;
                 remove_func() ;
-                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
