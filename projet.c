@@ -19,7 +19,7 @@ char dir[MAX_line] ;
 char user_str[MAX_line] ; // user string input
 char clipboard[MAX_line] ; // clipboard
 char format[10] ; // format of last file for undo 
-int end = 1,char_pos = 0; // char_pos use for where the next start
+int end = 1,char_pos = 0 , char_pos2 = 0; // char_pos use for where the next start
 
 // char_pos will be space or \0 
 void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( space ) or ( \0 )
@@ -134,6 +134,76 @@ void bringefilename2 (char filename2[] ,int start)
         }
     }
     filename2[temp_cnt] = '\0' ;
+}
+
+
+void bringeafter(char first[] , char second[],int start)
+{
+    int i = 0 ;
+    int temp_cnt = 0;
+    while(i < start)
+    {
+        second[temp_cnt] = first[i] ;
+        i++;
+        temp_cnt++;
+    }
+    int cnt_dir = 0;
+    if(first[start] == '"')
+    {
+        second[temp_cnt] = first[start] ;
+        temp_cnt ++ ;
+        start ++ ;
+        second[temp_cnt] = first[start] ;
+        temp_cnt ++ ;
+        start ++ ; 
+        char_pos2 = start ;
+        while(first[start] != '"')
+        {
+            if(first[start] != '/')
+                second[temp_cnt] = first[start] ;
+            else if(first[start] == '/' && cnt_dir == 0)
+            {
+                cnt_dir++ ;
+                second[temp_cnt] = first[start] ;
+            }
+            else if (first[start] == '/' && cnt_dir > 0)
+            {
+                second[temp_cnt] = first[start] ;
+            }
+            start ++ ;
+            temp_cnt ++ ;
+            char_pos2 ++ ;
+        }
+        second[temp_cnt] = first[start] ;
+        temp_cnt ++ ;
+        char_pos2 ++ ;
+    }
+
+    else
+    {
+        second[temp_cnt] = first[start] ;
+        start++ ; // after slash
+        temp_cnt ++ ;
+        char_pos2 = start ;
+        while(first[start] != '\0' && first[start] != ' ' && first[start] != '\n' ) //  && string_inpu[start] != '-'
+        {
+            if(first[start] != '/')
+                second[temp_cnt] = first[start] ;
+            else if(first[start] == '/' && cnt_dir == 0)
+            {
+                cnt_dir++ ;
+                second[temp_cnt] = first[start] ;
+            }
+            else if (first[start] == '/' && cnt_dir > 0)
+            {
+                second[temp_cnt] = first[start] ;
+            }
+            start ++ ;
+            temp_cnt ++ ;
+            char_pos2 ++ ;
+        }
+    }
+    second[temp_cnt] = '\0' ;
 }
 
 
@@ -397,6 +467,53 @@ void find_next_str3() // for grep
     }
 }
 
+/////// use for arman 
+// printf output file
+void print_out()
+{
+    FILE* out = fopen("output.txt", "r");
+
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,out) ;
+        if(feof(out))
+        {
+            keep_reading = false ;
+            print_std(buffer) ;
+        }
+        else print_std(buffer) ;
+    }
+    print_std("\n") ;
+
+    fclose(out);
+}
+
+// copy output
+void copy_output(char* write)
+{
+    FILE* out = fopen("output.txt", "a");
+    int i = 0 ;
+    while(write[i] != '\0')
+    {
+        fprintf(out,"%c",write[i]) ;
+        i++ ;
+    }
+    fclose(out) ;
+}
+
+// copy output number
+void copy_output_i(int num)
+{
+    FILE* out = fopen("output.txt", "a");
+    
+    fprintf(out,"%d",num) ;
+
+    fclose(out) ;
+}
+
 
 void copy_str(char buffer[] ,char save_buffer[][100] ,int col)
 {
@@ -595,7 +712,7 @@ void error(int number)
             printf("Error...! at and all can not come together.\n") ;
             break;
         case 8:
-            printf("not found.\n") ;
+            copy_output("not found.\n") ;
             break;
         case 9:
             printf("invalid depth.\n") ;
@@ -609,74 +726,13 @@ void error(int number)
 
 void print_std(char* buffer)
 {
-    printf("%s", buffer);
+    copy_output(buffer) ;
 }
 
 
-void print_std_i(int i)
+void print_std_i(int num)
 {
-    printf("%d\n",i) ;
-}
-
-/////// use for arman 
-// printf output file
-void print_out()
-{
-    FILE* out = fopen("output.txt", "r");
-
-    char buffer[MAX_line] ;
-    bool keep_reading = true ;
-    while(keep_reading)
-    {
-        memset(buffer,0,sizeof(buffer));
-        fgets(buffer,MAX_line,out) ;
-        if(feof(out))
-        {
-            keep_reading = false ;
-            print_std(buffer) ;
-        }
-        else print_std(buffer) ;
-    }
-    print_std("\n") ;
-
-    fclose(out);
-}
-
-// copy output
-void copy_output(char* write)
-{
-    FILE* out = fopen("output.txt", "a");
-    int i = 0 ;
-    while(write[i] != '\0')
-    {
-        fprintf(out,"%c",write[i]) ;
-        i++ ;
-    }
-    fclose(out) ;
-}
-
-// convert to str
-void convert_to_str()
-{
-    memset(user_str,0,sizeof(user_str));
-    FILE* out = fopen("output.txt", "r");
-
-    char buffer[MAX_line] ;
-    bool keep_reading = true ;
-    while(keep_reading)
-    {
-        memset(buffer,0,sizeof(buffer));
-        fgets(buffer,MAX_line,out) ;
-        if(feof(out))
-        {
-            keep_reading = false ;
-            strcat(user_str,buffer) ;
-        }
-        else 
-            strcat(user_str,buffer) ;
-    }
-
-    fclose(out) ;
+    copy_output_i(num) ;
 }
 
 
@@ -851,6 +907,9 @@ void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --po
 // cat file
 void cat_func() // start from 9
 {
+    FILE* out = fopen("output.txt" ,"w") ;
+    fclose(out) ;
+
     bringefilename(9);
     FILE* file = fopen(filename,"r");
     if(file == NULL)
@@ -1561,6 +1620,9 @@ int comp(char word1[][100], char word2[],int col) // word2 is the bigger one
 // find
 void find_func() // start from 10 // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
 {
+    FILE* out = fopen("output.txt" ,"w") ;
+    fclose(out) ;
+
     char_pos = 0;
     bringefilename(10) ; // char_pos will be ( )
     FILE* file = fopen(filename,"r") ;
@@ -1954,8 +2016,8 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                                 find = true ;
                                 cnt++ ;
                                 option = 4 ;
-                                if(cnt_camma) printf(",");
-                                printf("%d ",save_count);
+                                if(cnt_camma) copy_output(",");
+                                copy_output_i(save_count);
                                 cnt_camma = 1 ;
                                 col = 0;
                                 k = 0;
@@ -2002,8 +2064,8 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                             find = true ;
                             cnt++ ;
                             option = 4 ;
-                            if(cnt_camma) printf(",");
-                            printf("%d ",save_count);
+                            if(cnt_camma) copy_output(",");
+                            copy_output_i(save_count);
                             cnt_camma = 1 ;
                             col = 0;
                             k = 0;
@@ -2145,8 +2207,8 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                         {
                             find = true ;
                             option = 4 ;
-                            if(cnt_camma) printf(",");
-                            printf("%d ",save_pos);
+                            if(cnt_camma) copy_output(",");
+                            copy_output_i(save_pos);
                             cnt_camma = 1 ;
                             col = 0;
                             k = 0;
@@ -2190,8 +2252,8 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                     {
                         find = true ;
                         option = 4 ;
-                        if(cnt_camma) printf(",");
-                        printf("%d ",save_pos);
+                        if(cnt_camma) copy_output(",");
+                        copy_output_i(save_pos);
                         cnt_camma = 1 ;
                         col = 0;
                         k = 0;
@@ -2227,6 +2289,9 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
 // replace
 void replace_func()
 {
+    FILE* out = fopen("output.txt" ,"w") ;
+    fclose(out) ;
+
     bringefilename(13) ;
     save_for_undo();
     find_dir(); 
@@ -2739,8 +2804,8 @@ void replace_func()
         return ;
     }
 
-    if(find) printf("success\n") ;
-    else printf("could not find\n") ;
+    if(find) copy_output("success\n") ;
+    else copy_output("could not find\n") ;
 
 
     fclose(file) ;
@@ -2752,6 +2817,8 @@ void replace_func()
 // grep
 void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/root/test.txt --file/root/test.txt ...
 {
+    FILE* out = fopen("output.txt" ,"w") ;
+
     char_pos = 6 ;
     int len = strlen(string_inpu);
     char buffer[MAX_line] ;
@@ -2770,6 +2837,7 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
             if(file == NULL)
             {
                 error(2) ;
+                fclose(out) ;
                 return ;
             }
 
@@ -2785,14 +2853,14 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
                     keep_reading = false ;
                     if(strstr(buffer,user_str))
                     {
-                        printf("%s: %s\n",name_of_file,buffer); 
+                        fprintf(out,"%s: %s\n",name_of_file,buffer); 
                     }
                 }
                 else 
                 {
                     if(strstr(buffer,user_str))
                     {
-                        printf("%s: %s",name_of_file,buffer); 
+                        fprintf(out,"%s: %s",name_of_file,buffer); 
                     }
                 }
             }
@@ -2815,6 +2883,7 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
             if(file == NULL)
             {
                 error(2) ;
+                fclose(out) ;
                 return ;
             }
 
@@ -2860,6 +2929,7 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
             if(file == NULL)
             {
                 error(2) ;
+                fclose(out) ;
                 return ;
             }
 
@@ -2875,7 +2945,7 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
                     keep_reading = false ;
                     if(strstr(buffer,user_str))
                     {
-                        printf("%s\n",name_of_file); 
+                        fprintf(out,"%s\n",name_of_file); 
                         break;
                     }
                 }
@@ -2883,7 +2953,7 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
                 {
                     if(strstr(buffer,user_str))
                     {
-                        printf("%s\n",name_of_file); 
+                        fprintf(out,"%s\n",name_of_file); 
                         break;
                     }
                 }
@@ -2895,6 +2965,8 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
     }
     else
         error(5);
+
+    fclose(out) ;
 }
 
 //auto indent
@@ -3062,6 +3134,8 @@ void auto_func() // start from 17
 // compare
 void compare_func() // start from 13
 {
+    FILE* out = fopen("output.txt" ,"w") ;
+
     char_pos = 13 ;
     bringefilename(char_pos) ;
     
@@ -3074,6 +3148,7 @@ void compare_func() // start from 13
     if(file == NULL || file2 == NULL)
     {
         error(2) ;
+        fclose(out) ;
         return ;
     }
 
@@ -3098,7 +3173,7 @@ void compare_func() // start from 13
             which_first = 2 ; // i shouid print from file2
             if(strcmp(buffer1,buffer2) != 0)
             {
-                printf("============ #%d ============\n" ,line1) ;
+                fprintf(out,"============ #%d ============\n" ,line1) ;
                 print_std(buffer1);
                 print_std("\n");
                 print_std(buffer2);
@@ -3113,7 +3188,7 @@ void compare_func() // start from 13
             which_first = 1 ;
             if(strcmp(buffer1,buffer2) != 0)
             {
-                printf("============ #%d ============\n" ,line1) ;
+                fprintf(out,"============ #%d ============\n" ,line1) ;
                 print_std(buffer1);
                 // print_std("\n");
                 print_std(buffer2);
@@ -3127,7 +3202,7 @@ void compare_func() // start from 13
         {
             if(strcmp(buffer1,buffer2) != 0)
             {
-                printf("============ #%d ============\n" ,line1) ;
+                fprintf(out,"============ #%d ============\n" ,line1) ;
                 print_std(buffer1);
                 // print_std("\n");
                 print_std(buffer2);
@@ -3164,17 +3239,17 @@ void compare_func() // start from 13
             line1 ++;
         }
 
-        printf("<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<\n",save_line ,(line1-1)) ;
+        fprintf(out,"<<<<<<<<<<<< #%d - #%d <<<<<<<<<<<<\n",save_line ,(line1-1)) ;
         for(int i = 0 ; i < col ; i++)
         {
             int j = 0 ;
             while(save_buffer[j][i] != '\0')
             {
-                printf("%c", save_buffer[j][i]);
+                fprintf(out,"%c", save_buffer[j][i]);
                 j++ ;
             }
         }
-        printf("\n");
+        fprintf(out,"\n");
     }
     else if(which_first == 2)
     {
@@ -3197,27 +3272,28 @@ void compare_func() // start from 13
             }
             line2 ++;
         }
-        printf(">>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>\n",save_line ,(line2-1)) ;
+        fprintf(out,">>>>>>>>>>>> #%d - #%d >>>>>>>>>>>>\n",save_line ,(line2-1)) ;
         for(int i = 0 ; i < col ; i++)
         {
             int j = 0 ;
             while(save_buffer[j][i] != '\0')
             {
-                printf("%c", save_buffer[j][i]);
+                fprintf(out,"%c", save_buffer[j][i]);
                 j++ ;
             }
         }
-        printf("\n");
+        fprintf(out,"\n");
     }
 
-
+    fclose(out) ;
     fclose(file) ;
     fclose(file2) ;
 }
 
 // tree
-void tree(char *firstpath ,int depth ,int h)
+void tree(FILE* out ,char *firstpath ,int depth ,int h)
 {
+
     if(h == depth || depth+1 == h)
         return ;
 
@@ -3238,18 +3314,18 @@ void tree(char *firstpath ,int depth ,int h)
             for (i = 0; i < h ; i++) 
             {
                 if (i%2 == 0 || i == 0)
-                    printf("%c", 179);
+                    fprintf(out,"%c", 179);
                 else
-                    printf("\t");
+                    fprintf(out,"\t");
             }
             // if(strcmp(dp->d_name ,"."))
             // if(!strstr(dp->d_name,"undo"))
-            printf("%c%c%s\n", 195, 196, dp->d_name);
+            fprintf(out,"%c%c%s\n", 195, 196, dp->d_name);
 
             strcpy(path, firstpath);
             strcat(path, "/");
             strcat(path, dp->d_name);
-            tree(path, depth , h+2);
+            tree(out,path, depth , h+2);
         }
     }
 
@@ -3259,22 +3335,24 @@ void tree(char *firstpath ,int depth ,int h)
 
 void tree_func()
 {
+    FILE* out = fopen("output.txt","w") ;
     char_pos = 5 ;
     int depth = into_num(char_pos) ;
     
     char *path = "./root" ;
     if(depth == -1 || depth == 2)
     {
-        tree(path, 5,0) ;
+        tree(out,path, 5,0) ;
     }
     else if(depth == 1)
     {
-        tree(path, 3,0) ;
+        tree(out,path, 3,0) ;
     }
     else
     {
         error(9) ;
     }
+    fclose(out) ;
 }
 
 // undo 
@@ -3404,6 +3482,7 @@ int compare_my_func(char* mainstr , char* findstr)
 
 int find_2_func(char* mainstr , char* findstr)
 {
+    char_pos2 = 0 ;
     int i = 0 , j = 0 ;
     int count = 0 ;
     int len = strlen(findstr) ;
@@ -3413,8 +3492,10 @@ int find_2_func(char* mainstr , char* findstr)
         if(mainstr[i] == '=' && mainstr[i+1] == 'D')
         {
             i += 3 ;
+            char_pos2 += 3 ;
             break ;
         }
+        char_pos2 ++ ;
         i++ ;
     }
 
@@ -3438,6 +3519,62 @@ int find_2_func(char* mainstr , char* findstr)
         i++ ;
     }
     return 0 ;
+}
+
+
+void make_string_inpu_right(int after)
+{
+    int i = 0 , j = char_pos2;
+    char temp[MAX_line] ;
+    char add[MAX_line] ;
+
+    printf("char_pos2 = %d\n", char_pos2) ;
+    while(string_inpu[j] != '\0') // start after =D( )
+    {
+        temp[i] = string_inpu[j] ;
+        i++ ;
+        j++ ;
+    }
+    bringeafter(temp,add,after) ;
+
+    printf("temp : -%s\n",temp) ;
+    printf("add : -%s\n", add) ;
+
+    memset(string_inpu,0,sizeof(string_inpu)) ;
+
+    strcat(string_inpu,add) ;
+    strcat(string_inpu," --str \"") ;
+
+
+    FILE* out = fopen("output.txt", "r");
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,out) ;
+        if(feof(out))
+        {
+            keep_reading = false ;
+            strcat(string_inpu,buffer) ;
+        }
+        else 
+            strcat(string_inpu,buffer) ;
+    }
+    fclose(out) ;
+
+
+    memset(add,0,sizeof(add)) ;
+    add[0] = '"' ;
+    j = char_pos2 ;
+    i = 1;
+    while(temp[j] != '\0') // start after =D( )
+    {
+        add[i] = temp[j] ;
+        i++ ;
+        j++ ;
+    }    
+    strcat(string_inpu,add) ;
 }
 
 // check 
@@ -3483,19 +3620,31 @@ void check() // after adrress  comes space for seperating word
         {
             if(find_2_func(string_inpu , "insertstr--file"))
             {
-
+                cat_func();
+                make_string_inpu_right(15) ;
+                insert_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
-
+                cat_func();
+                make_string_inpu_right(15) ;
+                remove_func() ;
+                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
-
+                cat_func();
+                make_string_inpu_right(10) ;
+                find_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"grep"))
             {
-
+                cat_func();
+                make_string_inpu_right(4) ;
+                grep_func() ;
+                print_out() ;
             }
             else
             {
@@ -3521,28 +3670,36 @@ void check() // after adrress  comes space for seperating word
     }
     else if(findd)
     {
+        find_func();
         if(!arman)
         {
-            find_func();
             print_out() ;
         }
         else
         {
             if(find_2_func(string_inpu , "insertstr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                insert_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                remove_func() ;
+                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
-
+                make_string_inpu_right(10) ;
+                find_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"grep"))
             {
-
+                make_string_inpu_right(4) ;
+                grep_func() ;
+                print_out() ;
             }
             else
             {
@@ -3552,28 +3709,36 @@ void check() // after adrress  comes space for seperating word
     }
     else if(replacee)
     {
+        replace_func();
         if(!arman)
         {
-            replace_func();
             print_out() ;
         }
         else
         {
             if(find_2_func(string_inpu , "insertstr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                insert_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                remove_func() ;
+                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
-
+                make_string_inpu_right(10) ;
+                find_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"grep"))
             {
-
+                make_string_inpu_right(4) ;
+                grep_func() ;
+                print_out() ;
             }
             else
             {
@@ -3583,28 +3748,36 @@ void check() // after adrress  comes space for seperating word
     }
     else if(grepp)
     {
+        grep_func();
         if(!arman)
         {
-            grep_func();
             print_out() ;
         }
         else
         {
             if(find_2_func(string_inpu , "insertstr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                insert_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                remove_func() ;
+                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
-
+                make_string_inpu_right(10) ;
+                find_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"grep"))
             {
-
+                make_string_inpu_right(4) ;
+                grep_func() ;
+                print_out() ;
             }
             else
             {
@@ -3618,28 +3791,36 @@ void check() // after adrress  comes space for seperating word
     }
     else if(comparee)
     {
+        compare_func();
         if(!arman)
         {
-            compare_func();
             print_out() ;
         }
         else
         {
             if(find_2_func(string_inpu , "insertstr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                insert_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                remove_func() ;
+                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
-
+                make_string_inpu_right(10) ;
+                find_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"grep"))
             {
-
+                make_string_inpu_right(4) ;
+                grep_func() ;
+                print_out() ;
             }
             else
             {
@@ -3649,28 +3830,36 @@ void check() // after adrress  comes space for seperating word
     }
     else if(treee)
     {
+        tree_func();
         if(!arman)
         {
-            tree_func();
             print_out() ;
         }
         else
         {
             if(find_2_func(string_inpu , "insertstr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                insert_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"removestr--file"))
             {
-
+                make_string_inpu_right(15) ;
+                remove_func() ;
+                print_out() ;
             }
             else if (find_2_func(string_inpu,"find--file"))
             {
-
+                make_string_inpu_right(10) ;
+                find_func() ;
+                print_out() ;
             }
             else if(find_2_func(string_inpu,"grep"))
             {
-
+                make_string_inpu_right(4) ;
+                grep_func() ;
+                print_out() ;
             }
             else
             {
