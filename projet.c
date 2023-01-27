@@ -368,6 +368,29 @@ void find_next_str3() // for grep
                 }
             }
         }
+        if(string_inpu[char_pos] == '\\')
+        {
+            if(string_inpu[char_pos+1] == '\\')
+            {
+                if(string_inpu[char_pos+2] == 'n')
+                {
+                    char_pos ++ ;
+                }
+            }
+        }
+        else if(string_inpu[char_pos] != '\\')
+        {
+            if(string_inpu[char_pos+1] == '\\')
+            {
+                if(string_inpu[char_pos+2] == 'n')
+                {
+                    user_str[i] = string_inpu[char_pos] ;
+                    i++;
+                    char_pos += 2 ;
+                    string_inpu[char_pos] = '\n' ;
+                }
+            }
+        }
         user_str[i] = string_inpu[char_pos] ;
         i++;
         char_pos++ ;
@@ -595,6 +618,70 @@ void print_std_i(int i)
     printf("%d\n",i) ;
 }
 
+/////// use for arman 
+// printf output file
+void print_out()
+{
+    FILE* out = fopen("output.txt", "r");
+
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,out) ;
+        if(feof(out))
+        {
+            keep_reading = false ;
+            print_std(buffer) ;
+        }
+        else print_std(buffer) ;
+    }
+    print_std("\n") ;
+
+    fclose(out);
+}
+
+// copy output
+void copy_output(char* write)
+{
+    FILE* out = fopen("output.txt", "a");
+    int i = 0 ;
+    while(write[i] != '\0')
+    {
+        fprintf(out,"%c",write[i]) ;
+        i++ ;
+    }
+    fclose(out) ;
+}
+
+// convert to str
+void convert_to_str()
+{
+    memset(user_str,0,sizeof(user_str));
+    FILE* out = fopen("output.txt", "r");
+
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+    while(keep_reading)
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,out) ;
+        if(feof(out))
+        {
+            keep_reading = false ;
+            strcat(user_str,buffer) ;
+        }
+        else 
+            strcat(user_str,buffer) ;
+    }
+
+    fclose(out) ;
+}
+
+
+// functions
+
 // create file
 void create_func() // start from 16     // can't create file or dir with ( - )
 {
@@ -780,11 +867,15 @@ void cat_func() // start from 9
         if(feof(file))
         {
             keep_reading = false ;
-            print_std(buffer) ;
+            // print_std(buffer) ;
+            copy_output(buffer) ;
         }
-        else print_std(buffer) ;
+        else 
+            copy_output(buffer) ;
+            // print_std(buffer) ;
     }
-    print_std("\n") ;
+    // copy_output("\n") ;
+    // print_std("\n") ;
     fclose(file) ;
 }
 
@@ -3130,6 +3221,8 @@ void tree(char *firstpath ,int depth ,int h)
     if(h == depth || depth+1 == h)
         return ;
 
+    if(strstr(firstpath,"undo"))
+        return ;
     int i;
     char path[1000];
     struct dirent *dp;
@@ -3149,7 +3242,8 @@ void tree(char *firstpath ,int depth ,int h)
                 else
                     printf("\t");
             }
-            if(strcmp(dp->d_name ,"."))
+            // if(strcmp(dp->d_name ,"."))
+            // if(!strstr(dp->d_name,"undo"))
             printf("%c%c%s\n", 195, 196, dp->d_name);
 
             strcpy(path, firstpath);
@@ -3186,8 +3280,8 @@ void tree_func()
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
-    char temp2[MAX_line] = "root/undo/temp2" ;
-    char temp[MAX_line] = "root/undo/temp" ;
+    char temp2[MAX_line] = "undo/temp2" ;
+    char temp[MAX_line] = "undo/temp" ;
     strcat(temp,format); 
     strcat(temp2,format); 
     FILE* undo2 = fopen(temp2,"w") ;
@@ -3231,7 +3325,7 @@ void undo_func() // will copy undo temp to this file // just undo the  last file
 
 void save_for_undo() // must be used before undo
 {
-    char temp[MAX_line] = "root/undo/temp";
+    char temp[MAX_line] = "undo/temp";
     int i = 0 , j = 0 ,check = 0;
     while(filename[i] != '\0' && filename[i] != '\n') // for file format
     {
@@ -3278,80 +3372,311 @@ void save_for_undo() // must be used before undo
     fclose(file) ;
 }
 
+
+// compare my self func
+int compare_my_func(char* mainstr , char* findstr)
+{
+    int i = 0 , j = 0 ;
+    int count = 0 ;
+    int len = strlen(findstr) ;
+
+    while(mainstr[i] != '\0' && mainstr[i] != ' ')
+    {
+        if(mainstr[i] == findstr[j])
+        {
+            j++;
+            count++ ;
+            if(count == len)
+            {
+                return 1 ;
+            }
+        }
+        else
+        {
+            j = 0 ;
+            count = 0 ;
+        }
+        i++ ;
+    }
+    return 0 ;
+}
+
+
+int find_2_func(char* mainstr , char* findstr)
+{
+    int i = 0 , j = 0 ;
+    int count = 0 ;
+    int len = strlen(findstr) ;
+
+    while(mainstr[i] != '\0')
+    {
+        if(mainstr[i] == '=' && mainstr[i+1] == 'D')
+        {
+            i += 3 ;
+            break ;
+        }
+        i++ ;
+    }
+
+
+    while(mainstr[i] != '\0' && mainstr[i] != ' ')
+    {
+        if(mainstr[i] == findstr[j])
+        {
+            j++;
+            count++ ;
+            if(count == len)
+            {
+                return 1 ;
+            }
+        }
+        else
+        {
+            j = 0 ;
+            count = 0 ;
+        }
+        i++ ;
+    }
+    return 0 ;
+}
+
 // check 
 void check() // after adrress  comes space for seperating word 
 {
-    int eenndd = strstr(string_inpu,"exit");
-    int create = strstr(string_inpu,"createfile--file");// createfile--file/root/test.txt
-    int insert = strstr(string_inpu,"insertstr--file"); // insertstr--file/root/test.txt( )--str( )"something"( )--pos( )i:j
-    int undoo = strstr(string_inpu,"undo--file");
-    int catt = strstr(string_inpu,"cat--file");
-    int findd = strstr(string_inpu,"find--file"); // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
-    int replacee = strstr(string_inpu,"replace--file"); // replace--file/root/something( )str1( )
-    int removee = strstr(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )[-b/-f]
-    int copyy = strstr(string_inpu,"copystr--file");
-    int cutt = strstr(string_inpu,"cutstr--file");
-    int pastee = strstr(string_inpu,"pastestr--file");
-    int grepp = strstr(string_inpu,"grep");
-    int autoo = strstr(string_inpu,"auto-indent--file");
-    int comparee = strstr(string_inpu,"compare--file");
-    int treee = strstr(string_inpu,"tree");
+    int eenndd   = compare_my_func(string_inpu,"exit");
+    int create   = compare_my_func(string_inpu,"createfile--file");// createfile--file/root/test.txt
+    int insert   = compare_my_func(string_inpu,"insertstr--file"); // insertstr--file/root/test.txt( )--str( )"something"( )--pos( )i:j
+    int undoo    = compare_my_func(string_inpu,"undo--file");
+    int catt     = compare_my_func(string_inpu,"cat--file");
+    int findd    = compare_my_func(string_inpu,"find--file"); // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
+    int replacee = compare_my_func(string_inpu,"replace--file"); // replace--file/root/something( )str1( )
+    int removee  = compare_my_func(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )[-b/-f]
+    int copyy    = compare_my_func(string_inpu,"copystr--file");
+    int cutt     = compare_my_func(string_inpu,"cutstr--file");
+    int pastee   = compare_my_func(string_inpu,"pastestr--file");
+    int grepp    = compare_my_func(string_inpu,"grep");
+    int autoo    = compare_my_func(string_inpu,"auto-indent--file");
+    int comparee = compare_my_func(string_inpu,"compare--file");
+    int treee    = compare_my_func(string_inpu,"tree");
+    int arman    = strstr(string_inpu,"=D");
 
-    if(create)
+    if(create == 1 && arman == 0)
     {
         create_func();
     }
-    else if(insert)
+    else if(insert == 1 && arman == 0)
     {
         insert_func();
     }
-    else if(undoo)
+    else if(undoo == 1 && arman == 0)
     {
         undo_func();
     }
     else if(catt)
     {
-        cat_func() ;
+        if(!arman)
+        {
+            cat_func();
+            print_out() ;
+        }
+        else
+        {
+            if(find_2_func(string_inpu , "insertstr--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"removestr--file"))
+            {
+
+            }
+            else if (find_2_func(string_inpu,"find--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"grep"))
+            {
+
+            }
+            else
+            {
+                printf("Invalid input\n");
+            }
+        }
     }
-    else if(removee)
+    else if(removee == 1 && arman == 0)
     {
-        remove_func() ;
+        remove_func();
     }
-    else if(copyy)
+    else if(copyy == 1 && arman == 0)
     {
-        copy_func() ;
+        copy_func();
     }
-    else if(cutt)
+    else if(cutt == 1 && arman == 0)
     {
-        cut_func() ;
+        cut_func();
     }
-    else if(pastee)
+    else if(pastee == 1 && arman == 0)
     {
-        paste_func() ;
+        paste_func();
     }
     else if(findd)
     {
-        find_func() ;
+        if(!arman)
+        {
+            find_func();
+            print_out() ;
+        }
+        else
+        {
+            if(find_2_func(string_inpu , "insertstr--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"removestr--file"))
+            {
+
+            }
+            else if (find_2_func(string_inpu,"find--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"grep"))
+            {
+
+            }
+            else
+            {
+                printf("Invalid input\n");
+            }
+        }
     }
     else if(replacee)
     {
-        replace_func() ;
+        if(!arman)
+        {
+            replace_func();
+            print_out() ;
+        }
+        else
+        {
+            if(find_2_func(string_inpu , "insertstr--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"removestr--file"))
+            {
+
+            }
+            else if (find_2_func(string_inpu,"find--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"grep"))
+            {
+
+            }
+            else
+            {
+                printf("Invalid input\n");
+            }
+        }
     }
     else if(grepp)
     {
-        grep_func() ;
+        if(!arman)
+        {
+            grep_func();
+            print_out() ;
+        }
+        else
+        {
+            if(find_2_func(string_inpu , "insertstr--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"removestr--file"))
+            {
+
+            }
+            else if (find_2_func(string_inpu,"find--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"grep"))
+            {
+
+            }
+            else
+            {
+                printf("Invalid input\n");
+            }
+        }
     }
-    else if(autoo)
+    else if(autoo == 1 && arman == 0)
     {
-        auto_func() ;
+        auto_func();
     }
     else if(comparee)
     {
-        compare_func() ;
+        if(!arman)
+        {
+            compare_func();
+            print_out() ;
+        }
+        else
+        {
+            if(find_2_func(string_inpu , "insertstr--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"removestr--file"))
+            {
+
+            }
+            else if (find_2_func(string_inpu,"find--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"grep"))
+            {
+
+            }
+            else
+            {
+                printf("Invalid input\n");
+            }
+        }
     }
     else if(treee)
     {
-        tree_func() ;
+        if(!arman)
+        {
+            tree_func();
+            print_out() ;
+        }
+        else
+        {
+            if(find_2_func(string_inpu , "insertstr--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"removestr--file"))
+            {
+
+            }
+            else if (find_2_func(string_inpu,"find--file"))
+            {
+
+            }
+            else if(find_2_func(string_inpu,"grep"))
+            {
+
+            }
+            else
+            {
+                printf("Invalid input\n");
+            }
+        }
     }
     else if(eenndd)
         end = 0 ;
@@ -3369,8 +3694,13 @@ void input_in()
 
 int main()
 {
+    FILE* out = fopen("output.txt", "w");
+    fclose(out);
+
     while(end)
     {
         input_in();
     }
+
+    remove("output.txt");
 }
