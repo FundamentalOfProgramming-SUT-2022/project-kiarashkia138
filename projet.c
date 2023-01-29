@@ -7,6 +7,7 @@
 #include <process.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <errno.h>
 
 
 # define MAX_line 2048 
@@ -22,6 +23,64 @@ char format[10] ; // format of last file for undo
 int end = 1,char_pos = 0 , char_pos2 = 0; // char_pos use for where the next start
 
 // char_pos will be space or \0 
+void bringefilename0(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( space ) or ( \0 )
+{
+    memset(filename,0,sizeof(filename)) ;
+
+    int temp_cnt = 0;
+    int cnt_dir = 0;
+    if(string_inpu[start] == '"')
+    {
+        start += 2; // after slash 
+        char_pos = start ;
+        while(string_inpu[start] != '"')
+        {
+            if(string_inpu[start] != '/')
+                filename[temp_cnt] = string_inpu[start] ;
+            else if(string_inpu[start] == '/' && cnt_dir == 0)
+            {
+                cnt_dir++ ;
+                filename[temp_cnt] = string_inpu[start] ;
+            }
+            else if (string_inpu[start] == '/' && cnt_dir > 0)
+            {
+                CreateDirectory (filename, NULL);
+                filename[temp_cnt] = string_inpu[start] ;
+            }
+            start ++ ;
+            temp_cnt ++ ;
+            char_pos ++ ;
+        }
+        char_pos ++ ;
+    }
+
+    else
+    {
+        start++ ; // after slash
+        char_pos = start ;
+        while(string_inpu[start] != '\0' && string_inpu[start] != ' ' && string_inpu[start] != '\n' ) //  && string_inpu[start] != '-'
+        {
+            if(string_inpu[start] != '/')
+                filename[temp_cnt] = string_inpu[start] ;
+            else if(string_inpu[start] == '/' && cnt_dir == 0)
+            {
+                cnt_dir++ ;
+                filename[temp_cnt] = string_inpu[start] ;
+            }
+            else if (string_inpu[start] == '/' && cnt_dir > 0)
+            {
+                CreateDirectory (filename, NULL);
+                filename[temp_cnt] = string_inpu[start] ;
+            }
+            start ++ ;
+            temp_cnt ++ ;
+            char_pos ++ ;
+        }
+    }
+    filename[temp_cnt] = '\0' ;
+}
+
+
 void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( space ) or ( \0 )
 {
     memset(filename,0,sizeof(filename)) ;
@@ -980,9 +1039,10 @@ void remove_func()
     char c ;
     int now_line = 1;
     int now_pos = 0;
-    int i = 0;
+    int i = 0 , flag_1 = 0;
     char temp[MAX_line] ;
     int temp_i[MAX_line] = {0} ;
+
 
     if(string_inpu[char_pos] == 'b')
     {
@@ -993,6 +1053,8 @@ void remove_func()
             {
                 temp_i[i-1] = 1;
                 temp_i[i-size] = 1;
+                if(size-1 == 0)
+                    flag_1 = 1;
             }
             if(c == '\n')
             {
@@ -1012,6 +1074,8 @@ void remove_func()
             {   
                 dob++ ;
                 dob %= 2 ;
+                if(flag_1 == 1)
+                    dob = 0 ;
             }
         
             else if(dob == 0)
@@ -1029,6 +1093,8 @@ void remove_func()
             {
                 temp_i[i] = 1;
                 temp_i[i+size-1] = 1;
+                if(size-1 == 0)
+                    flag_1 = 1;
             }
             if(c == '\n')
             {
@@ -1048,6 +1114,8 @@ void remove_func()
             {   
                 dob++ ;
                 dob %= 2 ;
+                if(flag_1 == 1)
+                    dob = 0 ;
             }
         
             else if(dob == 0)
@@ -1105,7 +1173,7 @@ void copy_func()
     char c ;
     int now_line = 1;
     int now_pos = 0;
-    int i = 0;
+    int i = 0 , flag_1 = 0;
     char temp[MAX_line] ;
     int temp_i[MAX_line] = {0} ;
     memset(clipboard,0,MAX_line) ;
@@ -1119,6 +1187,8 @@ void copy_func()
             {
                 temp_i[i-1] = 1;
                 temp_i[i-size] = 1;
+                if(size == 1)
+                    flag_1 = 1;
             }
             if(c == '\n')
             {
@@ -1141,6 +1211,8 @@ void copy_func()
                 dob %= 2 ;
                 clipboard[j] = temp[i] ;
                 j++ ;
+                if(flag_1 == 1)
+                    dob = 0 ;
             }
             else if(dob == 1)
             {
@@ -1242,7 +1314,7 @@ void cut_func()
     char c ;
     int now_line = 1;
     int now_pos = 0;
-    int i = 0;
+    int i = 0 , flag_1 = 0 ;
     char temp[MAX_line] ;
     int temp_i[MAX_line] = {0} ;
     memset(clipboard,0,MAX_line) ;
@@ -1256,6 +1328,8 @@ void cut_func()
             {
                 temp_i[i-1] = 1;
                 temp_i[i-size] = 1;
+                if(size-1 == 0)
+                    flag_1 = 1;
             }
             if(c == '\n')
             {
@@ -1278,6 +1352,8 @@ void cut_func()
                 dob %= 2 ;
                 clipboard[j] = temp[i] ;
                 j++ ;
+                if(flag_1 == 1)
+                    dob = 0 ;
             }
             else if(dob == 1)
             {
@@ -1299,6 +1375,8 @@ void cut_func()
             {
                 temp_i[i] = 1;
                 temp_i[i+size-1] = 1;
+                if(size-1 == 0)
+                    flag_1 = 1;
             }
             if(c == '\n')
             {
@@ -1321,6 +1399,8 @@ void cut_func()
                 dob %= 2 ;
                 clipboard[j] = temp[i] ;
                 j++ ;
+                if(flag_1 == 1)
+                    dob = 0;
             }
             else if(dob == 1)
             {
