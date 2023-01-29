@@ -7,9 +7,20 @@
 #include <process.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <winuser.h>
+
 
 
 # define MAX_line 2048 
+
+#define RED   "\x1B[31m"
+#define GRN   "\x1B[32m"
+#define YEL   "\x1B[33m"
+#define BLU   "\x1B[34m"
+#define MAG   "\x1B[35m"
+#define CYN   "\x1B[36m"
+#define WHT   "\x1B[37m"
+#define RESET "\x1B[0m"
 
 
 char string_inpu[MAX_line] ;
@@ -3863,6 +3874,294 @@ void input_in()
 {
     gets(string_inpu);
     check();
+}
+
+
+
+void name_of_file_func(char out[])
+{
+    int len = strlen(filename) ;
+    len-- ;
+
+    while(filename[len] != '.' )
+    {
+        len-- ;
+    }
+    len-- ;
+    int last = len ;
+
+    while (filename[len] != '/' && len >= 0)
+    {
+        len-- ;
+    }
+    len++ ;
+    int first = len ;
+    int j = 0 ;
+    for (int i = first; i <= last; i++)
+    {
+        out[j] = filename[i] ;
+        j++ ;
+    }
+}
+
+
+void do_com(char command[])
+{
+    printf("command : %s\n",command) ;
+}
+
+
+void graphic_func()
+{
+    int i = 0 ;
+    char line_com[MAX_line] ; // command
+    char input ;
+
+    char out[MAX_line] ;
+    name_of_file_func(out) ;
+
+    FILE* file = fopen(filename , "r") ;
+    char buffer[MAX_line] ;
+    bool keep_reading = true ;
+
+    
+
+    char board[MAX_line][MAX_line] ;
+    int x , y , xx ,yy ; // pos of cursur // x 29 , y 119
+    int first_line = 1 , last_line = 27 , dis = 26;
+    int line = 1;
+    int size_line[100] ;
+    int mode = 0 ; // normal = 0 , visual = 1 , insert = 2
+    bool saved = false ;
+
+    POINT xy ;
+    GetCursorPos(&xy) ;
+    x  = xy.x ;
+    xx = xy.x ; // first pos of cursor
+    y  = xy.y ;
+    yy = xy.y ; // first pos of cursor
+
+    while(end)
+    {
+        system("cls") ;
+        memset(size_line,0,sizeof(size_line)) ;
+        while(keep_reading)
+        {
+            memset(buffer,0,sizeof(buffer));
+            fgets(buffer,MAX_line,file) ;
+            size_line[line-1] = strlen(buffer) ; // size of each string
+            int len = strlen(buffer) ;
+            while(len > 114)
+            {
+                dis-- ;
+                len -= 114 ;
+            }
+            printf("%3d ",line) ;
+            if(feof(file) || (line - first_line) == dis)
+            {
+                keep_reading = false ;
+                printf("%s",buffer) ;
+                printf("\n") ;
+                while((line - first_line) != dis)
+                {
+                    printf(" ~\n") ;
+                    line++ ;
+                }
+            }
+            else 
+                printf("%s",buffer) ;
+            line++ ;
+        }
+
+
+        if(mode == 0) // normal
+        {
+            if(saved)
+            {
+                printf("NORMAL   /   %s \n",out) ;
+            }
+            else
+            {
+                printf("NORMAL   /   %s + \n",out) ;
+            }
+
+            input = getch() ;
+            switch (input)
+            {
+                case ':' :
+                    printf("%c",input) ;
+                    i = 0 ;
+                    input = getchar() ;
+                    while (input != '\n')
+                    {
+                        line_com[i] = input ;
+                        i++ ;
+                        input = getchar() ;
+                    }
+                    do_com(line_com) ;
+                    break;
+                
+                case 'i' :
+                    mode = 2 ;
+                    break;
+                
+                case 'v' :
+                    mode = 1 ;
+                    break;
+
+            }
+        }
+
+
+        else if(mode == 1) // visual
+        {
+            if(saved)
+            {
+                printf("VISUAL   /   %s \n",out) ;
+            }
+            else
+            {
+                printf("VISUAL   /   %s + \n",out) ;
+            }
+
+            input = getch() ;
+            switch (input)
+            {
+                case 'k' : // up
+                    if(y-yy > 4)
+                    {
+                        y-- ;
+                        SetCursorPos(x,y) ;
+                    }
+                    else if(y-yy <= 4 && first_line > 1)
+                    {
+                        first_line-- ;
+                        last_line-- ;
+                    }
+                    else if(y-yy <= 4 && y-yy > 1)
+                    {
+                        y--;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case 'j' : // down
+                    if(y-yy < 24)
+                    {
+                        y++ ;
+                        SetCursorPos(x,y) ;
+                    }
+                    else if(y-yy >= 24 && last_line < line)
+                    {
+                        first_line++ ;
+                        last_line++ ;
+                    }
+                    else if(y-yy >= 24 && y-yy < 27)
+                    {
+                        y++ ;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case 'l' : // right
+                    if(x-xx < size_line[y-yy])
+                    {
+                        x++ ;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case 'h' : // left
+                    if(y > 0)
+                    {
+                        x-- ;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case '/' :
+                    mode = 0 ;
+                    break ;
+            }
+        }
+        
+        
+        else if(mode == 2) // insert
+        {
+            if(saved)
+            {
+                printf("INSERT   /   %s \n",out) ;
+            }
+            else
+            {
+                printf("INSERT   /   %s + \n",out) ;
+            }
+
+            input = getch() ;
+            switch (input)
+            {
+                case 'k' : // up
+                    if(y-yy > 4)
+                    {
+                        y-- ;
+                        SetCursorPos(x,y) ;
+                    }
+                    else if(y-yy <= 4 && first_line > 1)
+                    {
+                        first_line-- ;
+                        last_line-- ;
+                    }
+                    else if(y-yy <= 4 && y-yy > 1)
+                    {
+                        y--;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case 'j' : // down
+                    if(y-yy < 24)
+                    {
+                        y++ ;
+                        SetCursorPos(x,y) ;
+                    }
+                    else if(y-yy >= 24 && last_line < line)
+                    {
+                        first_line++ ;
+                        last_line++ ;
+                    }
+                    else if(y-yy >= 24 && y-yy < 27)
+                    {
+                        y++ ;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case 'l' : // right
+                    if(x-xx < size_line[y-yy])
+                    {
+                        x++ ;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case 'h' : // left
+                    if(y > 0)
+                    {
+                        x-- ;
+                        SetCursorPos(x,y) ;
+                    }
+                    break ;
+
+                case '/' :
+                    mode = 0 ;
+                    break ;
+            }
+        }
+    
+
+    }
+
+    fclose(file) ;
 }
 
 
