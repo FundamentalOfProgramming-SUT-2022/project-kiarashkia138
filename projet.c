@@ -16,6 +16,7 @@
 char string_inpu[MAX_line] ;
 char filename[MAX_line] ; // filename 
 char name_of_file[MAX_line] ; 
+char name[MAX_line] ;
 char dir[MAX_line] ;
 char user_str[MAX_line] ; // user string input
 char clipboard[MAX_line] ; // clipboard
@@ -286,19 +287,28 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
         last_pos-- ;
         for (char_pos; char_pos <= last_pos; char_pos++ )
         {
-            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            {
-                char_pos++;
-                first_pos ++ ;
-                // string_inpu[char_pos] = '\n' ;
-            } 
-            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            {
-                user_str[char_pos - first_pos] = string_inpu[char_pos] ;
-                char_pos += 2;
-                first_pos ++;
-                string_inpu[char_pos] = '\n' ;
-            }
+            // if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            // {
+            //     char_pos += 2;
+            //     first_pos += 2 ;
+            //     string_inpu[char_pos] = '\\n' ;
+
+            //     // printf("herer \n");
+            //     // printf("1 : %c\n", string_inpu[char_pos] );
+            //     // printf("2 : %c\n", string_inpu[char_pos+1] );
+
+            //     // string_inpu[char_pos] = '\\' ;
+
+            //     // char_pos ++ ;
+            //     // string_inpu[char_pos] = '\\n' ;
+            // } 
+            // else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            // {
+            //     user_str[char_pos - first_pos] = string_inpu[char_pos] ;
+            //     char_pos += 2;
+            //     first_pos ++;
+            //     string_inpu[char_pos] = '\n' ;
+            // }
             user_str[char_pos - first_pos] = string_inpu[char_pos] ;
         }
         char_pos += 1 ;
@@ -325,17 +335,17 @@ void find_next_str(int type) // char_pos = pos of space // type for having(1) or
         int i = 0;
         while(string_inpu[char_pos] != ' ' && string_inpu[char_pos] != '\0')
         {
-            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            {
-                char_pos++;
-            } 
-            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            {
-                user_str[i] = string_inpu[char_pos] ;
-                char_pos += 2;
-                i++ ;
-                string_inpu[char_pos] = '\n' ;
-            }
+            // if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            // {
+            //     char_pos++;
+            // } 
+            // else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            // {
+            //     user_str[i] = string_inpu[char_pos] ;
+            //     char_pos += 2;
+            //     i++ ;
+            //     string_inpu[char_pos] = '\n' ;
+            // }
             user_str[i] = string_inpu[char_pos] ;
             i++ ;
             char_pos++;
@@ -416,17 +426,17 @@ void find_next_str2(char str1[],int type)
                     return;
                 }
             }
-            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            {
-                char_pos++;
-            }
-            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            {
-                str1[i] = string_inpu[char_pos] ;
-                char_pos += 2 ;
-                i++ ;
-                string_inpu[char_pos] = '\n' ;
-            }
+            // if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            // {
+            //     char_pos++;
+            // }
+            // else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            // {
+            //     str1[i] = string_inpu[char_pos] ;
+            //     char_pos += 2 ;
+            //     i++ ;
+            //     string_inpu[char_pos] = '\n' ;
+            // }
             str1[i] = string_inpu[char_pos] ;
             i++ ;
             char_pos += 1 ;
@@ -460,6 +470,29 @@ void find_next_str2(char str1[],int type)
         }
         // char pos will be in space
     }
+}
+
+
+void name_file()
+{
+    memset(name, 0, sizeof(name));
+    int i = strlen(filename) -1 ;
+    int j = 0 ;
+    
+
+    while(filename[i] != '/') 
+    {
+        i--;
+    }
+    i++ ;
+
+    while(filename[i] != '\0' && filename[i] != '\n')
+    {
+        name[j] = filename[i] ;
+        i++;
+        j++;
+    }
+    name[j] = '\0' ;
 }
 
 
@@ -497,29 +530,29 @@ void find_next_str3() // for grep
                 }
             }
         }
-        if(string_inpu[char_pos] == '\\')
-        {
-            if(string_inpu[char_pos+1] == '\\')
-            {
-                if(string_inpu[char_pos+2] == 'n')
-                {
-                    char_pos ++ ;
-                }
-            }
-        }
-        else if(string_inpu[char_pos] != '\\')
-        {
-            if(string_inpu[char_pos+1] == '\\')
-            {
-                if(string_inpu[char_pos+2] == 'n')
-                {
-                    user_str[i] = string_inpu[char_pos] ;
-                    i++;
-                    char_pos += 2 ;
-                    string_inpu[char_pos] = '\n' ;
-                }
-            }
-        }
+        // if(string_inpu[char_pos] == '\\')
+        // {
+        //     if(string_inpu[char_pos+1] == '\\')
+        //     {
+        //         if(string_inpu[char_pos+2] == 'n')
+        //         {
+        //             char_pos ++ ;
+        //         }
+        //     }
+        // }
+        // else if(string_inpu[char_pos] != '\\')
+        // {
+        //     if(string_inpu[char_pos+1] == '\\')
+        //     {
+        //         if(string_inpu[char_pos+2] == 'n')
+        //         {
+        //             user_str[i] = string_inpu[char_pos] ;
+        //             i++;
+        //             char_pos += 2 ;
+        //             string_inpu[char_pos] = '\n' ;
+        //         }
+        //     }
+        // }
         user_str[i] = string_inpu[char_pos] ;
         i++;
         char_pos++ ;
@@ -974,6 +1007,7 @@ void cat_func() // start from 9
     if(file == NULL)
     {
         error(2) ;
+        return ;
     }
 
     char buffer[MAX_line] ;
@@ -2414,9 +2448,9 @@ void replace_func()
     bool keep_reading = true ;
     int pos = 0 ,cnt = 0 , i = 0 , j = 0 , k = 0 ,col = 0;
     int temp_pos = 0 ,word_cnt = 1, count = 0 ,save_pos = 0;
-    int save_count = 1 ;
-    int option = 0 ;
-    char check ;
+    // int save_count = 1 ;
+    // int option = 0 ;
+    // char check ;
 
     while(str1[i] != '\0')
     {
@@ -2472,7 +2506,7 @@ void replace_func()
                     }
 
                     temp[j] = '\0' ; 
-                    int l = 0 ;
+                    // int l = 0 ;
 
                     if(find == false && comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
                     {
@@ -2814,7 +2848,7 @@ void replace_func()
                     pos = temp_pos+1 ;
                 }
                 temp[j] = '\0' ; 
-                int l = 0 ;
+                // int l = 0 ;
 
                 if(find == false && comp(temp_user,temp,col) && (en_sp[k] == '\0' || en_sp[k] == buffer[i]))
                 {
@@ -3435,10 +3469,11 @@ void tree_func()
 // undo 
 void undo_func() // will copy undo temp to this file // just undo the  last file or will do nonscnene
 {
-    char temp2[MAX_line] = "undo/temp2" ;
-    char temp[MAX_line] = "undo/temp" ;
-    strcat(temp,format); 
-    strcat(temp2,format); 
+    char temp2[MAX_line] = "undo/temp2-" ;
+    char temp[MAX_line] = "undo/temp-" ;
+    name_file() ;
+    strcat(temp,name); 
+    strcat(temp2,name); 
     FILE* undo2 = fopen(temp2,"w") ;
     FILE* file = fopen(filename,"r") ;
 
@@ -3480,7 +3515,7 @@ void undo_func() // will copy undo temp to this file // just undo the  last file
 
 void save_for_undo() // must be used before undo
 {
-    char temp[MAX_line] = "undo/temp";
+    char temp[MAX_line] = "undo/temp-";
     int i = 0 , j = 0 ,check = 0;
     while(filename[i] != '\0' && filename[i] != '\n') // for file format
     {
@@ -3496,7 +3531,10 @@ void save_for_undo() // must be used before undo
         }
         if(check == 0) i++ ;
     }
-    strcat(temp,format) ;
+
+    name_file() ;
+
+    strcat(temp,name) ;
     FILE* undo = fopen(temp,"w") ;
     FILE* file = fopen(filename,"r") ;
     if(file == NULL )
@@ -3659,20 +3697,20 @@ void check() // after adrress  comes space for seperating word
 {
     int eenndd   = compare_my_func(string_inpu,"exit");
     int create   = compare_my_func(string_inpu,"createfile--file");// createfile--file/root/test.txt
-    int insert   = compare_my_func(string_inpu,"insertstr--file"); // insertstr--file/root/test.txt( )--str( )"something"( )--pos( )i:j
-    int undoo    = compare_my_func(string_inpu,"undo--file");
-    int catt     = compare_my_func(string_inpu,"cat--file");
+    int insert   = compare_my_func(string_inpu,"insertstr--file"); // insertstr--file/root/test.txt( )--str( )"something"( )--pos( )a:b
+    int undoo    = compare_my_func(string_inpu,"undo--file"); // undo--file/root/something
+    int catt     = compare_my_func(string_inpu,"cat--file"); //cat--file/root/something
     int findd    = compare_my_func(string_inpu,"find--file"); // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
-    int replacee = compare_my_func(string_inpu,"replace--file"); // replace--file/root/something( )str1( )
-    int removee  = compare_my_func(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )[-b/-f]
-    int copyy    = compare_my_func(string_inpu,"copystr--file");
-    int cutt     = compare_my_func(string_inpu,"cutstr--file");
-    int pastee   = compare_my_func(string_inpu,"pastestr--file");
-    int grepp    = compare_my_func(string_inpu,"grep");
-    int autoo    = compare_my_func(string_inpu,"auto-indent--file");
-    int comparee = compare_my_func(string_inpu,"compare--file");
-    int treee    = compare_my_func(string_inpu,"tree");
-    int arman    = strstr(string_inpu,"=D");
+    int replacee = compare_my_func(string_inpu,"replace--file"); // replace--file/root/something( )--str1( )--str2( )[-at( )n / -all]
+    int removee  = compare_my_func(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )-size( )n( )(-b/-f)
+    int copyy    = compare_my_func(string_inpu,"copystr--file"); // copystr--file/root/something( )--pos( )a:b( )-size( )n( )(-b/-f)
+    int cutt     = compare_my_func(string_inpu,"cutstr--file"); // cutstr--file/root/something( )--pos( )a:b( )-size( )n( )(-b/-f)
+    int pastee   = compare_my_func(string_inpu,"pastestr--file"); // pastestr--file/root/something( )--pos( )a:b
+    int grepp    = compare_my_func(string_inpu,"grep"); // grep [-c/-l] --str "something" --file/root/test.txt --file/root/test1.txt 
+    int autoo    = compare_my_func(string_inpu,"auto-indent--file"); //auto-indent--file/root/something
+    int comparee = compare_my_func(string_inpu,"compare--file"); // compare--file/root/something --file/root/something1
+    int treee    = compare_my_func(string_inpu,"tree"); // tree n
+    int arman    = strstr(string_inpu,"=D"); // 
 
     if(create == 1 && arman == 0)
     {
