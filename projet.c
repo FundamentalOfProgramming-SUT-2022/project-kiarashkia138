@@ -3913,66 +3913,143 @@ void do_com(char command[])
 
 void graphic_func()
 {
-    int i = 0 ;
+    int end = 1 , i = 0 ;
     char line_com[MAX_line] ; // command
     char input ;
 
     char out[MAX_line] ;
     name_of_file_func(out) ;
 
-    FILE* file = fopen(filename , "r") ;
+    // FILE* file = fopen(filename , "r") ;
     char buffer[MAX_line] ;
     bool keep_reading = true ;
 
     
 
     char board[MAX_line][MAX_line] ;
-    int x , y , xx ,yy ; // pos of cursur // x 29 , y 119
-    int first_line = 1 , last_line = 27 , dis = 26;
+    int x , y , xx ,yy ,t_x = 0 ,t_y = 1; // pos of cursur // x 119 , y 29
+    int first_line = 1 , last_line = 0 ,last_line2 = 0 , last_line3 = 27, dis = 26;
+    int len = 0 ,t_cnt = 0 ,t_cnt2 = 0;
     int line = 1;
     int size_line[100] ;
     int mode = 0 ; // normal = 0 , visual = 1 , insert = 2
     bool saved = false ;
 
-    POINT xy ;
-    GetCursorPos(&xy) ;
-    x  = xy.x ;
-    xx = xy.x ; // first pos of cursor
-    y  = xy.y ;
-    yy = xy.y ; // first pos of cursor
+    char c = getch() ;
+
+    x = 0 ;
+    y = 1 ;
+    yy = 0 ; // where cursor is in new lines
 
     while(end)
     {
+        FILE* file = fopen(filename , "r") ;
         system("cls") ;
+        keep_reading = true ;
+        t_x = 0 ;
+        line = 1 ;
+        dis = 26 ;
+
         memset(size_line,0,sizeof(size_line)) ;
         while(keep_reading)
         {
             memset(buffer,0,sizeof(buffer));
             fgets(buffer,MAX_line,file) ;
             size_line[line-1] = strlen(buffer) ; // size of each string
-            int len = strlen(buffer) ;
-            while(len > 114)
+            len = strlen(buffer) ;
+
+            if(line >= first_line)
             {
-                dis-- ;
-                len -= 114 ;
-            }
-            printf("%3d ",line) ;
-            if(feof(file) || (line - first_line) == dis)
-            {
-                keep_reading = false ;
-                printf("%s",buffer) ;
-                printf("\n") ;
-                while((line - first_line) != dis)
+
+                while(len > 114)
                 {
-                    printf(" ~\n") ;
-                    line++ ;
+                    dis-- ;
+                    len -= 114 ;
+                }
+
+                printf(WHT "%3d ",line,RESET) ;
+
+                if(feof(file) || (line - first_line) == dis)
+                {
+                    keep_reading = false ;
+                    size_line[line-1]-- ;
+                    if(line == y)
+                    {
+                        for(t_x = 0 ; t_x < strlen(buffer) ; t_x++)
+                        {
+                            if(t_x == x)
+                            {
+                                if(buffer[t_x] == ' ')
+                                    printf(CYN "_" RESET) ;
+                                else
+                                    printf(CYN "%c",buffer[t_x], RESET) ;
+                            }
+                            else
+                            {
+                                printf(WHT "%c",buffer[t_x],RESET) ;
+                            }   
+                        }
+                    }
+                    else 
+                    {
+                        printf(WHT "%s",buffer ,RESET) ;
+                    }
+                    printf("\n") ;
+                    
+                    if(t_cnt == 0)
+                    {
+                        last_line = line ;
+                        last_line2 = line ;
+                        t_cnt++ ;
+                    }
+                    last_line3 = line ;
+
+                    while(line < yy)
+                    {   
+                        line++ ;
+                        printf(WHT "%3d ",line,RESET) ;
+                        printf("\n") ;
+                    }
+                    if(line == yy)
+                    {
+                        line++;
+                        printf(WHT "%3d ",line,RESET) ;
+                        printf(CYN "_\n" RESET) ;
+                    }
+                    while((line - first_line) < dis)
+                    {
+                        printf(WHT " ~\n" RESET) ;
+                        line++ ;
+                    }
+                }
+                else 
+                {
+                    size_line[line-1] -= 2 ;
+                    if(line == y)
+                    {
+                        for(t_x = 0 ; t_x < strlen(buffer) ; t_x++)
+                        {
+                            if(t_x == x)
+                            {
+                                if(buffer[t_x] == ' ')
+                                    printf(CYN "_" RESET) ;
+                                else
+                                    printf(CYN "%c",buffer[t_x], RESET) ;
+                            }
+                            else
+                            {
+                                printf(WHT "%c",buffer[t_x] ,RESET) ;
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        printf(WHT "%s",buffer ,RESET) ;
+                    }
                 }
             }
-            else 
-                printf("%s",buffer) ;
             line++ ;
         }
-
 
         if(mode == 0) // normal
         {
@@ -3989,6 +4066,7 @@ void graphic_func()
             switch (input)
             {
                 case ':' :
+                    memset(line_com,0,sizeof(line_com));
                     printf("%c",input) ;
                     i = 0 ;
                     input = getchar() ;
@@ -4024,58 +4102,84 @@ void graphic_func()
                 printf("VISUAL   /   %s + \n",out) ;
             }
 
+
             input = getch() ;
             switch (input)
             {
                 case 'k' : // up
-                    if(y-yy > 4)
+                    if(y > first_line+3)
                     {
                         y-- ;
-                        SetCursorPos(x,y) ;
+                        if(x > size_line[y-1])
+                        {
+                            x = size_line[y-1] ;
+                        }
+                        if(y <= last_line3)
+                        {
+                            t_cnt = 0 ;
+                            t_cnt2 = 0 ;
+                            yy = 0 ;
+                        }
+                        else
+                        {
+                            if(t_cnt2 == 0 )
+                            {
+                                last_line2-- ;
+                                t_cnt2 = 1;
+                            }
+                            last_line2-- ;
+                            yy = last_line2 ;
+                        }
                     }
-                    else if(y-yy <= 4 && first_line > 1)
+                    else if(y <= first_line+3 && first_line > 1)
                     {
                         first_line-- ;
+                        y-- ;
                         last_line-- ;
                     }
-                    else if(y-yy <= 4 && y-yy > 1)
+                    else if(y <= first_line+3 && y > 1)
                     {
                         y--;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
                 case 'j' : // down
-                    if(y-yy < 24)
+                    if(y < last_line-3)
                     {
                         y++ ;
-                        SetCursorPos(x,y) ;
+                        if(x > size_line[y-1])
+                        {
+                            x = size_line[y-1] ;
+                        }
+                        if(y > last_line2)
+                        {
+                            yy = last_line2 ;
+                            last_line2++ ;
+                        }
                     }
-                    else if(y-yy >= 24 && last_line < line)
+                    else if(y >= last_line-3 && last_line < line)
                     {
                         first_line++ ;
                         last_line++ ;
+                        y++ ;
                     }
-                    else if(y-yy >= 24 && y-yy < 27)
+                    else if(y >= last_line-3 && y < 27)
                     {
                         y++ ;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
                 case 'l' : // right
-                    if(x-xx < size_line[y-yy])
+                    if(x < size_line[y-1])
                     {
                         x++ ;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
                 case 'h' : // left
-                    if(y > 0)
+                    if(x > 0)
                     {
                         x-- ;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
@@ -4101,54 +4205,56 @@ void graphic_func()
             switch (input)
             {
                 case 'k' : // up
-                    if(y-yy > 4)
+                    if(y > 4)
                     {
                         y-- ;
-                        SetCursorPos(x,y) ;
+                        if(x > size_line[y-1])
+                        {
+                            x = size_line[y-1] ;
+                        }
                     }
-                    else if(y-yy <= 4 && first_line > 1)
+                    else if(y <= 4 && first_line > 1)
                     {
                         first_line-- ;
-                        last_line-- ;
+                        // last_line-- ;
                     }
-                    else if(y-yy <= 4 && y-yy > 1)
+                    else if(y <= 4 && y > 1)
                     {
                         y--;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
                 case 'j' : // down
-                    if(y-yy < 24)
+                    if(y < 24)
                     {
                         y++ ;
-                        SetCursorPos(x,y) ;
+                        if(x > size_line[y-1])
+                        {
+                            x = size_line[y-1] ;
+                        }
                     }
-                    else if(y-yy >= 24 && last_line < line)
+                    else if(y >= 24 && last_line < line)
                     {
                         first_line++ ;
-                        last_line++ ;
+                        // last_line++ ;
                     }
-                    else if(y-yy >= 24 && y-yy < 27)
+                    else if(y >= 24 && y < 27)
                     {
                         y++ ;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
                 case 'l' : // right
-                    if(x-xx < size_line[y-yy])
+                    if(x < size_line[y-1])
                     {
                         x++ ;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
                 case 'h' : // left
-                    if(y > 0)
+                    if(x > 0)
                     {
                         x-- ;
-                        SetCursorPos(x,y) ;
                     }
                     break ;
 
@@ -4158,10 +4264,8 @@ void graphic_func()
             }
         }
     
-
+        fclose(file) ;
     }
-
-    fclose(file) ;
 }
 
 
