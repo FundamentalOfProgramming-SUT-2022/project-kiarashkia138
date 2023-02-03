@@ -2111,7 +2111,12 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                 {
                     if(buffer[i] == ' ' || buffer[i] == '\n')
                     {
-                        count_word++ ;
+                        if(i != 0 ) count_word++ ;
+                        while(buffer[i] == ' ' || buffer[i] == '\n')
+                        {
+                            i++ ;
+                        }
+                        i-- ;
                         if(count == 0)
                         {
                             save_count = count_word ;
@@ -2210,7 +2215,12 @@ void find_func() // start from 10 // find--file/root/something( )--str( )["]some
                 {
                     if(buffer[i] == ' ' || buffer[i] == '\n')
                     {
-                        count_word++ ;
+                        if(i != 0 ) count_word++ ;
+                        while(buffer[i] == ' ' || buffer[i] == '\n')
+                        {
+                            i++ ;
+                        }
+                        i-- ;
                         if(count == 0)
                         {
                             save_count = count_word ;
