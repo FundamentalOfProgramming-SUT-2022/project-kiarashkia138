@@ -1162,6 +1162,7 @@ void remove_func()
     {
         fclose(file) ;
         fclose(new) ;
+        remove(dir) ;
         error(5) ;
         return ;
     }
@@ -1452,6 +1453,7 @@ void cut_func()
     {
         fclose(file) ;
         fclose(new) ;
+        remove(dir) ;
         error(5) ;
         return ;
     }
@@ -1641,12 +1643,43 @@ int comp(char word1[][100], char word2[],int col) // word2 is the bigger one
     int count = 0 , nege = 1 ,save_count = 0;
     int j = 0,flag_star = 0; // 1 for *something and 2 for something*
 
-    if(word1[0][col] == '*')
+    if(word1[0][col] == '*' && word1[len1-1][col] == '*' && word1[len1-2][col] != '\\')
+        flag_star = 3 ;
+    else if(word1[0][col] == '*')
         flag_star = 1 ;
     else if(word1[len1-1][col] == '*' && word1[len1-2][col] != '\\')
         flag_star = 2 ;
 
-    if(flag_star == 1)
+    if(flag_star == 3)
+    {
+        count = 2 ;
+        i = 1 ;
+        while(word2[j] != '\0')
+        {
+            if(word11[i] == '\\' && word11[i+1] == '*')
+            {
+                i++;
+                count++ ;
+            }
+
+            if(word2[j] == word11[i])
+            {
+                count++;
+                i++ ;
+            }
+            else
+            {
+                count = 2;
+                i = 1 ;
+            }
+            j++;
+            if(count == len1 )
+            {
+                return 1 ;
+            }
+        }
+    }
+    else if(flag_star == 1)
     {
         count = 1 ;
         i = 1 ;

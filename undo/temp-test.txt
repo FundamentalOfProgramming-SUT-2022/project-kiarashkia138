@@ -4,10 +4,9 @@ AA\nAA
 Aabcd
 
 kiaA\nAA
-AA\nAA
-AA\nAA 1
-line 2
-L--test.txt
+AA
+AA
+AA\nAA st.txt
 L--test2.txt
 L--test.txt
 L--test2.txt
