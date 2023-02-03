@@ -3284,14 +3284,15 @@ void compare_func() // start from 13
 
         if(feof(file))
         {
-            which_first = 2 ; // i shouid print from file2
+            which_first = 2 ; // i should print from file2
             if(strcmp(buffer1,buffer2) != 0)
             {
                 fprintf(out,"============ #%d ============\n" ,line1) ;
-                print_std(buffer1);
-                print_std("\n");
-                print_std(buffer2);
-                print_std("\n");
+                fprintf(out,"%s\n",buffer1);
+                fprintf(out,"%s\n",buffer2);
+                // print_std("\n");
+                // print_std(buffer2);
+                // print_std("\n");
             }
 
             if(feof(file2))
@@ -3303,10 +3304,12 @@ void compare_func() // start from 13
             if(strcmp(buffer1,buffer2) != 0)
             {
                 fprintf(out,"============ #%d ============\n" ,line1) ;
-                print_std(buffer1);
+                fprintf(out,"%s",buffer1);
+                fprintf(out,"%s\n",buffer2);
+                // print_std(buffer1);
                 // print_std("\n");
-                print_std(buffer2);
-                print_std("\n");
+                // print_std(buffer2);
+                // print_std("\n");
             }
 
             if(feof(file))
@@ -3317,10 +3320,12 @@ void compare_func() // start from 13
             if(strcmp(buffer1,buffer2) != 0)
             {
                 fprintf(out,"============ #%d ============\n" ,line1) ;
-                print_std(buffer1);
+                fprintf(out,"%s",buffer1);
+                fprintf(out,"%s\n",buffer2);
+                // print_std(buffer1);
+                // // print_std("\n");
+                // print_std(buffer2);
                 // print_std("\n");
-                print_std(buffer2);
-                print_std("\n");
             }
         }
         line1 ++;
