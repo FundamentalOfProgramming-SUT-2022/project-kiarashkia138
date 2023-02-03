@@ -1,9 +1,11 @@
 kia
-rahkia\nrahkianrahkia
-rahkia
-rahkia
-rahkiakiakia
-rahkiarahline 1
+hkia\rahkia\nrahkianrahkia
+AA\nAA
+Aabcd
+
+kiaA\nAA
+AA\nAA
+AA\nAA 1
 line 2
 L--test.txt
 L--test2.txt

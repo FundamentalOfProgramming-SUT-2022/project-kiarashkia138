@@ -82,7 +82,7 @@ void bringefilename0(int start) // will create directory // start positin is ( "
 }
 
 
-void bringefilename(int start) // will create directory // start positin is ( " ) or ( / ) // char_pos bring back ( space ) or ( \0 )
+void bringefilename(int start) // wont create directory // start positin is ( " ) or ( / ) // char_pos bring back ( space ) or ( \0 )
 {
     memset(filename,0,sizeof(filename)) ;
 
@@ -103,7 +103,7 @@ void bringefilename(int start) // will create directory // start positin is ( " 
             }
             else if (string_inpu[start] == '/' && cnt_dir > 0)
             {
-                CreateDirectory (filename, NULL);
+                // CreateDirectory (filename, NULL);
                 filename[temp_cnt] = string_inpu[start] ;
             }
             start ++ ;
@@ -128,7 +128,7 @@ void bringefilename(int start) // will create directory // start positin is ( " 
             }
             else if (string_inpu[start] == '/' && cnt_dir > 0)
             {
-                CreateDirectory (filename, NULL);
+                // CreateDirectory (filename, NULL);
                 filename[temp_cnt] = string_inpu[start] ;
             }
             start ++ ;
@@ -426,17 +426,17 @@ void find_next_str2(char str1[],int type)
                     return;
                 }
             }
-            // if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            // {
-            //     char_pos++;
-            // }
-            // else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
-            // {
-            //     str1[i] = string_inpu[char_pos] ;
-            //     char_pos += 2 ;
-            //     i++ ;
-            //     string_inpu[char_pos] = '\n' ;
-            // }
+            if(string_inpu[char_pos] == '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            {
+                char_pos++;
+            }
+            else if(string_inpu[char_pos] != '\\' && string_inpu[char_pos+1] == '\\' && string_inpu[char_pos+2] == 'n')
+            {
+                str1[i] = string_inpu[char_pos] ;
+                char_pos += 2 ;
+                i++ ;
+                string_inpu[char_pos] = '\n' ;
+            }
             str1[i] = string_inpu[char_pos] ;
             i++ ;
             char_pos += 1 ;
@@ -833,7 +833,7 @@ void print_std_i(int num)
 // create file
 void create_func() // start from 16     // can't create file or dir with ( - )
 {
-    bringefilename(16);
+    bringefilename0(16);
     FILE* file = fopen(filename,"a");
     if(file == NULL)
         error(1) ;
@@ -845,11 +845,9 @@ void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --po
 {
     char_pos = 0 ; // will return pos of ( " ) or ( - )
     bringefilename(15) ;
-    save_for_undo() ;
     find_dir() ;
     strcat(dir,"tempfileforcopy") ;
     strcat(dir,format) ;
-    FILE* new = fopen(dir,"w") ;
     FILE* file = fopen(filename,"r") ;
 
     if(file == NULL)
@@ -857,11 +855,13 @@ void insert_func() // start from 15 //(new)insertstr--file<address> --str<> --po
         error(2) ;
         return ;
     }
+    FILE* new = fopen(dir,"w") ;
     if(new == NULL)
     {
         error(3);
         return ;
     }
+    save_for_undo() ;
 
     find_next_str(1) ;
     char_pos += 7 ; // show the first number
@@ -1035,20 +1035,20 @@ void cat_func() // start from 9
 void remove_func()
 {
     bringefilename(15) ;
-    save_for_undo() ;
     find_dir() ;
 
     strcat(dir,"tempforremove") ;
     strcat(dir,format) ;
 
     FILE* file = fopen(filename,"r") ;
-    FILE* new = fopen(dir,"w") ;
 
     if(file == NULL)
     {
         error(2) ; 
         return ;
     }
+    FILE* new = fopen(dir,"w") ;
+    save_for_undo() ;
     char_pos++ ; // after space
     while(string_inpu[char_pos] != ' ')
     {
@@ -1310,20 +1310,21 @@ void copy_func()
 void cut_func()
 {
     bringefilename(12) ;
-    save_for_undo() ;
     find_dir() ;
 
     strcat(dir,"tempforcut") ;
     strcat(dir,format) ;
 
     FILE* file = fopen(filename,"r") ;
-    FILE* new = fopen(dir,"w") ;
 
     if(file == NULL)
     {
         error(2) ; 
         return ;
     }
+    FILE* new = fopen(dir,"w") ;
+    save_for_undo() ;
+
     char_pos++ ; // after space
     while(string_inpu[char_pos] != ' ')
     {
@@ -1467,20 +1468,21 @@ void cut_func()
 void paste_func()
 {
     bringefilename(14) ;
-    save_for_undo() ;
     find_dir() ;
 
     strcat(dir,"tempforpaste") ;
     strcat(dir,format) ;
 
     FILE* file = fopen(filename,"r") ;
-    FILE* new = fopen(dir,"w") ;
 
     if(file == NULL)
     {
         error(2) ; 
         return ;
     }
+    FILE* new = fopen(dir,"w") ;
+    save_for_undo() ;
+
     char_pos++ ; // after space
     while(string_inpu[char_pos] != ' ')
     {
@@ -2407,7 +2409,6 @@ void replace_func()
     fclose(out) ;
 
     bringefilename(13) ;
-    save_for_undo();
     find_dir(); 
 
     strcat(dir,"tempforreplace") ;
@@ -2419,6 +2420,7 @@ void replace_func()
         error(2) ; 
         return ;
     }
+    save_for_undo();
 
     FILE* new = fopen(dir,"w") ;
 
@@ -2433,7 +2435,11 @@ void replace_func()
 
 
     find_next_str2(str1,1);
-    find_next_str2(str2,1);
+    find_next_str2(str2,1) ;
+
+    printf("str1 : %s \n", str1);
+    printf("str2 : %s \n", str2);
+
     int op = find_options() ;
 
 
@@ -3087,7 +3093,6 @@ void grep_func() // grep [-c/-l] --str "something" --file/root/test.txt --file/r
 void auto_func() // start from 17
 {
     bringefilename(17) ;
-    save_for_undo() ;
     find_dir() ;
 
     strcat(dir,"tempforindent") ;
@@ -3100,6 +3105,7 @@ void auto_func() // start from 17
         error(2) ; 
         return ;
     }
+    save_for_undo() ;
     FILE* new = fopen(dir,"w") ;
 
     char buffer[MAX_line] ;
@@ -3706,7 +3712,7 @@ void check() // after adrress  comes space for seperating word
     int undoo    = compare_my_func(string_inpu,"undo--file"); // undo--file/root/something
     int catt     = compare_my_func(string_inpu,"cat--file"); //cat--file/root/something
     int findd    = compare_my_func(string_inpu,"find--file"); // find--file/root/something( )--str( )["]something["]( )[-count/-at/-byword]( )[-all]
-    int replacee = compare_my_func(string_inpu,"replace--file"); // replace--file/root/something( )--str1( )--str2( )[-at( )n / -all]
+    int replacee = compare_my_func(string_inpu,"replace--file"); // replace--file/root/something( )--str1( )"somthing"( )--str2( )"somthing"( )[-at( )n / -all]
     int removee  = compare_my_func(string_inpu,"removestr--file"); // removestr--file/root/something( )--pos( )a:b( )-size( )n( )(-b/-f)
     int copyy    = compare_my_func(string_inpu,"copystr--file"); // copystr--file/root/something( )--pos( )a:b( )-size( )n( )(-b/-f)
     int cutt     = compare_my_func(string_inpu,"cutstr--file"); // cutstr--file/root/something( )--pos( )a:b( )-size( )n( )(-b/-f)
