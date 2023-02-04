@@ -85,7 +85,7 @@ void name_file(char out[])
 }
 
 
-void do_command(int x ,int y , int siz)
+void do_command(int x ,int y , bool* saved)
 {
     memset(string_inpu, 0, sizeof(string_inpu)) ;
     printf(WHT ":" RESET) ;
@@ -101,20 +101,29 @@ void do_command(int x ,int y , int siz)
     if(strcmp(string_inpu, "save") == 0)
     {
         copy_fi("root/temp--1.txt",filename) ;
+        *(saved) = true ;
     }
     else if(strstr(string_inpu, "saveas") == 0) // take addresss // saveas ""
     {
         copy_fi("root/temp--1.txt",filename) ;
+        char filename2[MAX_line] ;
 
-        bringfilename(7) ;
+        bringfilename2(filename2 , 7) ;
+
+        rename(filename, filename2) ;
+        *(saved) = true ;
     }
     else if(strcmp(string_inpu, "paste") == 0)
     {
+        memset(string_inpu, 0, sizeof(string_inpu));
 
+        snprintf(string_inpu ,MAX_line,"pastestr--file/root/temp--1.txt --pos %d:%d",y,x) ;
+        paste_func() ;
     }
     else if(strcmp(string_inpu, "open") == 0)
     {
-
+        bringfilename(5) ;
+        *(saved) = false ;
     }
     else
     {
@@ -506,7 +515,6 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
         char input = getch() ;
         if(do_move(size_line,first_line,l_x,l_y,input) == 1)
         {
-            int siz = strlen(be4clip) ;
             memset(string_inpu,0,sizeof(string_inpu));
 
             if(input == 'i')
@@ -521,7 +529,7 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
             }
             else if(input == ':')
             {
-                do_command(*(x),*(y),siz) ;
+                do_command(*(x),*(y),saved) ;
             }
             else if(input == 'p')
             {
