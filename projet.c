@@ -3992,22 +3992,22 @@ void check() // after adrress  comes space for seperating word
 }
 
 
-// void input_in()
-// {
-//     gets(string_inpu);
-//     check();
-// }
+void input_in()
+{
+    gets(string_inpu);
+    check();
+}
 
 
-// int main()
-// {
-//     FILE* out = fopen("output.txt", "w");
-//     fclose(out);
+int main()
+{
+    FILE* out = fopen("output.txt", "w");
+    fclose(out);
 
-//     while(end)
-//     {
-//         input_in();
-//     }
+    while(end)
+    {
+        input_in();
+    }
 
-//     remove("output.txt");
-// }
+    remove("output.txt");
+}
