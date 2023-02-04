@@ -4008,6 +4008,8 @@ void copy_fi(char* name_fi ,char* name_se)
     FILE* file = fopen(name_fi,"r");
     FILE* file2 = fopen(name_se,"w");
 
+
+
     char buffer[MAX_line] ;
     bool keep = true ;
 
@@ -4220,12 +4222,14 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
 
     copy_fi(filename,"root/temp--1.txt") ;
 
-    FILE* file = fopen("root/temp--1.txt" , "r") ;
+    FILE* file = fopen("root/temp--1.txt" , "a") ;
+    
     if(file == NULL)
     {
         printf("Error\n") ;
         return ;
     }
+
 
     int size_line[100] = {0} ;
     char buffer[MAX_line] ;
@@ -4234,6 +4238,8 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
     int line = 1 , k = 0;
     int distance = 23 ;
     int cnt_line = 0 ;
+    
+
     
     while(keep_reading)
     {
@@ -4244,6 +4250,7 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
         if(feof(file))
             keep_reading = false ;
 
+        printf("here33\n") ;
         if((line >= *(first_line)) && (line <= (*(first_line)+distance)))
         {
             cnt_line++ ;
@@ -4439,6 +4446,8 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
         line++ ;
     }
 
+    
+
     if(cnt_line != distance+1)
     {
         while(line >= *(first_line) && line <= (*(first_line)+distance))
@@ -4460,7 +4469,7 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
         }
     }
 
-
+    printf("herererererer\n\n");
     char name_fi[100] ;
     name_file2(name_fi) ;
     
@@ -4508,7 +4517,7 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
     }
 
     fclose(file) ;
-
+    fprintf(file,"\n222herererererer22\n\n");
     if(*(mode) == 0 )
     {
         char input = getch() ;
@@ -4638,18 +4647,12 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
 }
 
 
-// void input_in(int* first_line , int* mode , int* x , int* y , int* l_x , int* l_y , bool* saved) 
-// {
-//     show_window(first_line , mode , x , y , l_x , l_y , saved) ;
-// }
-
-
 int main()
 {
     FILE* out = fopen("output.txt", "w");
-    FILE* emty = fopen("emty.txt", "w");
     fclose(out);
-    fclose(emty);
+    // FILE* emty = fopen("emty.txt", "w");
+    // fclose(emty);
 
     int* first_line = 1 ;
     int* mode = 0 ;
@@ -4657,12 +4660,32 @@ int main()
     int* y = 1 , *l_y = 0 ;
     bool* saved = false ;
 
-    strcat(filename,"emty.txt");
+    // strcat(filename,"emty.txt");
+    while(1)
+    {
+        system("cls") ;
+        printf("please enter the name of your file\n") ;
+        memset(filename,0,sizeof(filename));
+
+        gets(filename) ;
+
+        FILE* che = fopen(filename,"r");
+        if(che == NULL)
+        {
+            printf("\ninvalid filename\n");
+        }
+        else
+        {
+            fclose(che);
+            break ;
+        }
+    }
 
     while(end)
     {
         show_window(first_line , mode , x , y , l_x , l_y , saved);
     }
 
+    remove("root/temp--1.txt") ;
     remove("output.txt");
 }
