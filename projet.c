@@ -33,6 +33,30 @@ char format[10] ; // format of last file for undo
 int end = 1,char_pos = 0 , char_pos2 = 0; // char_pos use for where the next start
 
 
+void copy_fi(char* name_fi ,char* name_se)
+{
+    FILE* file = fopen(name_fi,"r");
+    FILE* file2 = fopen(name_se,"w");
+
+    char buffer[MAX_line] ;
+    bool keep = true ;
+
+    while( keep )
+    {
+        memset(buffer,0,sizeof(buffer));
+        fgets(buffer,MAX_line,file);
+
+        if(feof(file))
+            keep = false ;
+
+        fputs(buffer,file2) ;
+    }
+
+    fclose(file);
+    fclose(file2);
+}
+
+
 void name_file(char out[])
 {
     int len = strlen(filename) ;
@@ -61,9 +85,8 @@ void name_file(char out[])
 }
 
 
-void do_command(int x ,int y ,int mode , int siz)
+void do_command(int x ,int y , int siz)
 {
-    // add pos with size in string_inpu
     memset(string_inpu, 0, sizeof(string_inpu)) ;
     printf(WHT ":" RESET) ;
     int i = 0 ;
@@ -73,6 +96,29 @@ void do_command(int x ,int y ,int mode , int siz)
         string_inpu[i] = input ;
         i++ ;
         input = getchar() ;
+    }
+
+    if(strcmp(string_inpu, "save") == 0)
+    {
+        copy_fi("root/temp--1.txt",filename) ;
+    }
+    else if(strstr(string_inpu, "saveas") == 0) // take addresss // saveas ""
+    {
+        copy_fi("root/temp--1.txt",filename) ;
+
+        bringfilename(7) ;
+    }
+    else if(strcmp(string_inpu, "paste") == 0)
+    {
+
+    }
+    else if(strcmp(string_inpu, "open") == 0)
+    {
+
+    }
+    else
+    {
+        check() ;
     }
 }
 
@@ -164,9 +210,10 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
 {
     system("cls") ;
 
-    FILE* file2 = fopen(filename , "r") ;
-    FILE* file = fopen(filename , "r") ;
-    if(file2 == NULL)
+    copy_fi(filename,"root/temp--1.txt") ;
+
+    FILE* file = fopen("root/temp--1.txt" , "r") ;
+    if(file == NULL)
     {
         printf("Error\n") ;
         return ;
@@ -456,6 +503,32 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
 
     if(*(mode) == 0 )
     {
+        char input = getch() ;
+        if(do_move(size_line,first_line,l_x,l_y,input) == 1)
+        {
+            int siz = strlen(be4clip) ;
+            memset(string_inpu,0,sizeof(string_inpu));
+
+            if(input == 'i')
+            {
+                *(mode) = 2;
+                return ;
+            }
+            else if(input == 'v')
+            {
+                *(mode) = 1;
+                return ;
+            }
+            else if(input == ':')
+            {
+                do_command(*(x),*(y),siz) ;
+            }
+            else if(input == 'p')
+            {
+                snprintf(string_inpu,MAX_line , "pastestr--file/root/temp--1.txt --pos %d:%d",*(y),*(x)) ;
+                paste_func() ;
+            }
+        }
 
     }
     else if (*(mode) == 1)
@@ -484,22 +557,22 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
             {
                 if(*(y) < *(l_y))
                 {
-                    snprintf(string_inpu,256,"removestr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
+                    snprintf(string_inpu,256,"removestr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
                 }
                 else if(*(y) == *(l_y))
                 {
                     if(*(l_x) >= *(x))
                     {
-                        snprintf(string_inpu,256,"removestr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
+                        snprintf(string_inpu,256,"removestr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
                     }
                     else
                     {
-                        snprintf(string_inpu,256,"removestr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
+                        snprintf(string_inpu,256,"removestr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
                     }
                 }
                 else
                 {
-                    snprintf(string_inpu,256,"removestr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
+                    snprintf(string_inpu,256,"removestr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
                 }
 
                 remove_func() ;
@@ -508,22 +581,22 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
             {
                 if(*(y) < *(l_y))
                 {
-                    snprintf(string_inpu,256,"cutstr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
+                    snprintf(string_inpu,256,"cutstr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
                 }
                 else if(*(y) == *(l_y))
                 {
                     if(*(l_x) >= *(x))
                     {
-                        snprintf(string_inpu,256,"cutstr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
+                        snprintf(string_inpu,256,"cutstr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(y),*(x),siz) ;
                     }
                     else
                     {
-                        snprintf(string_inpu,256,"cutstr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
+                        snprintf(string_inpu,256,"cutstr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
                     }
                 }
                 else
                 {
-                    snprintf(string_inpu,256,"cutstr--file\"/%s\" --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
+                    snprintf(string_inpu,256,"cutstr--file/root/temp--1.txt --pos %d:%d -size %d -f",filename,*(l_y),*(l_x),siz) ;
                 }
                 cut_func() ;
             }
@@ -565,12 +638,12 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
 
         else if( ( int )input == 8)
         {
-            snprintf(string_inpu,256 ,"removestr--file\"/%s\" --pos %d:%d -size 1 -b",filename,y,x) ;
+            snprintf(string_inpu,256 ,"removestr--file/root/temp--1.txt --pos %d:%d -size 1 -b",filename,y,x) ;
             remove_func() ;
         }
         else
         {
-            snprintf(string_inpu,256 ,"insertstr--file\"/%s\" --str \"%c\" --pos %d:%d",filename,input,y,x) ;
+            snprintf(string_inpu,256 ,"insertstr--file/root/temp--1.txt --str \"%c\" --pos %d:%d",filename,input,y,x) ;
             insert_func() ;
         }
     }
