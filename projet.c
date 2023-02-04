@@ -3152,8 +3152,8 @@ void auto_func() // start from 17
     FILE* new = fopen(dir,"w") ;
 
     char buffer[MAX_line] ;
-    int tabb = 0 ;
-    int came = 0 , first = 0 ;
+    int tabb = 0  ,t_tab = 0 ;
+    int ent = 0 , after = 0;
     int i = 0 ;
     bool keep_reading = true ;
 
@@ -3164,127 +3164,88 @@ void auto_func() // start from 17
         if(feof(file))
         {
             keep_reading = false ;
-            while(buffer[i] != '\0')
-            {
-                if(first == 1)
-                {
-                    for(int j = 0 ; j < tabb ; j++)
-                    {
-                        fputc('\t',new) ;
-                    }
-                    first = 0 ;
-                }
-
-                if(buffer[i] == '{')
-                {
-                    if(buffer[i-1] != ' ' && buffer[i-1] != '{' && buffer[i-1] != '}' && i-1 >= 0)
-                    {
-                        fputc(' ',new) ;
-                    }
-                    fputc(buffer[i],new) ;
-                    fputc('\n',new) ;
-                    tabb++ ;
-                    came = 1 ;
-                    first = 1 ;
-                }
-                else if(buffer[i] == '}')
-                {
-                    tabb-- ;
-                    int check = 1 ;
-                    int k = i ;
-                    while(buffer[k] != '}')
-                    {
-                        if(buffer[k] != ' ')
-                        {
-                            check = 0 ;
-                            break;
-                        }
-                        k++ ;
-                    }
-                    fputc('\n',new) ;
-                    for(int j = 0 ; j < tabb ; j++)
-                    {
-                        fputc('\t',new) ;
-                    }
-                    fputc(buffer[i],new) ;
-                    if(!check) fputc('\n',new) ;
-                    first = 1 ;
-                    came = 0 ;
-                }
-                else if(buffer[i] == ' ' && came == 1)
-                {
-                    came = 1 ;
-                }
-                else
-                {
-                    came = 0 ;
-                    fputc(buffer[i],new) ;
-                }
-
-                i++ ;
-            }
         }
-        else 
+
+        i = 0 ;
+        while (buffer[i] != '\0')
         {
-            while(buffer[i] != '\0')
+            if(ent)
             {
-                if(first == 1)
+                ent = 0 ;
+                t_tab = 0;
+                while(t_tab < tabb)
                 {
-                    for(int j = 0 ; j < tabb ; j++)
-                    {
-                        fputc('\t',new) ;
-                    }
-                    first = 0 ;
+                    fputc('\t',new) ;
+                    t_tab++ ;
                 }
-
-                if(buffer[i] == '{')
-                {
-                    if(buffer[i-1] != ' ' && buffer[i-1] != '{' && buffer[i-1] != '}' && i-1 >= 0)
-                    {
-                        fputc(' ',new) ;
-                    }
-                    fputc(buffer[i],new) ;
-                    fputc('\n',new) ;
-                    tabb++ ;
-                    came = 1 ;
-                    first = 1 ;
-                }
-                else if(buffer[i] == '}')
-                {
-                    tabb-- ;
-                    int check = 1 ;
-                    int k = i ;
-                    while(buffer[k] != '}')
-                    {
-                        if(buffer[k] != ' ')
-                        {
-                            check = 0 ;
-                            break;
-                        }
-                        k++ ;
-                    }
-                    fputc('\n',new) ;
-                    for(int j = 0 ; j < tabb ; j++)
-                    {
-                        fputc('\t',new) ;
-                    }
-                    fputc(buffer[i],new) ;
-                    if(!check) fputc('\n',new) ;
-                    first = 1 ;
-                    came = 0 ;
-                }
-                else if(buffer[i] == ' ' && came == 1)
-                {
-                    came = 1 ;
-                }
-                else
-                {
-                    came = 0 ;
-                    fputc(buffer[i],new) ;
-                }
-
-                i++ ;
             }
+            
+            if(buffer[i] =='{' && buffer[i-1] != ' ' && buffer[i-1] != '\n' && buffer[i-1] != '{' && buffer[i-1] != '}'  && i >= 1)
+            {
+                fputs(" {\n",new) ;
+                while(buffer[i+1] != '\0' && (buffer[i+1] == ' ' || buffer[i+1] == '\n'))
+                {
+                    i++ ;
+                }
+                tabb++ ;
+                ent = 1; 
+            }
+            else if(buffer[i] == '}')
+            {
+                tabb-- ;
+                int t_i = i-1 ;
+                int came = 0 ;
+                while(t_i > 0 && buffer[t_i] != '}')
+                {
+                    if(buffer[t_i] != ' ' && buffer[t_i] != '\n')
+                    {
+                        came = 1 ;
+                        break;
+                    }
+                    t_i-- ;
+                }
+                t_i = i+1 ;
+                after = 0 ;
+                while(buffer[t_i] != '}')
+                {
+                    if(buffer[t_i] != ' ' && buffer[t_i] != '\n')
+                    {
+                        after = 1 ;
+                        break;
+                    }
+                    t_i++ ;
+                }
+                if(came) fputc('\n',new) ;
+                t_tab = 0;
+                while(t_tab < tabb)
+                {
+                    fputc('\t',new) ;
+                    t_tab++ ;
+                }
+                fputs("}\n",new) ;
+                while(buffer[i+1] != '\0' && (buffer[i+1] == ' ' || buffer[i+1] == '\n'))
+                {
+                    i++ ;
+                }
+                if(after) ent = 1 ;
+                else 
+                    ent = 0 ;
+            }
+            else if (buffer[i] == '{')
+            {
+                fputs("{\n",new) ;
+                tabb++ ;
+                ent = 1;
+                while(buffer[i+1] != '\0' && (buffer[i+1] == ' ' || buffer[i+1] == '\n'))
+                {
+                    i++ ;
+                }
+            }
+            else
+            {
+                fputc(buffer[i],new) ;
+            }
+            i++ ;
         }
     }
 
