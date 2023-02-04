@@ -35,6 +35,7 @@ int end = 1,char_pos = 0 , char_pos2 = 0; // char_pos use for where the next sta
 
 void copy_fi(char* name_fi ,char* name_se)
 {
+    save_for_undo() ;
     FILE* file = fopen(name_fi,"r");
     FILE* file2 = fopen(name_se,"w");
 
@@ -125,6 +126,36 @@ void do_command(int x ,int y , bool* saved)
         bringfilename(5) ;
         *(saved) = false ;
     }
+    else if(strcmp(string_inpu, "u") == 0 || strcmp(string_inpu, "undo") == 0)
+    {
+        memset(string_inpu, 0, sizeof(string_inpu)) ;
+        if(*(saved))
+        {
+            snprintf(string_inpu ,MAX_line,"undo--file\"/%s\"",filename) ;
+            undo_func() ;
+        }
+        else
+        {
+            
+        }
+    }
+    else if(string_inpu[0] == '/')
+    {
+        int k = 1 ;
+        char st_fi[MAX_line] ;
+        while(string_inpu[k] != '\0')
+        {
+            st_fi[k-1] = string_inpu[k] ;
+            k++;
+        }
+        st_fi[k-1] = '\0' ;
+
+        memset(string_inpu, 0, sizeof(string_inpu)) ;
+
+        snprintf(string_inpu ,MAX_line,"find--file/root/temp--1.txt --str \"%s\" -all",st_fi);
+        find_func() ; 
+    }
+
     else
     {
         check() ;
