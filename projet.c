@@ -3185,7 +3185,7 @@ void auto_func() // start from 17
                 t_tab = 0;
                 while(t_tab < tabb)
                 {
-                    fputc('\t',new) ;
+                    fputs("     ",new) ;
                     t_tab++ ;
                 }
             }
@@ -3229,7 +3229,7 @@ void auto_func() // start from 17
                 t_tab = 0;
                 while(t_tab < tabb)
                 {
-                    fputc('\t',new) ;
+                    fputs("     ",new) ;
                     t_tab++ ;
                 }
                 fputs("}\n",new) ;
