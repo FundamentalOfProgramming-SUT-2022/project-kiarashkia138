@@ -4069,13 +4069,14 @@ void do_command(int x ,int y , bool* saved)
         i++ ;
         input = getchar() ;
     }
+    
 
-    if(compare_my_func(string_inpu, "save") == 0)
+    if(compare_my_func(string_inpu, "save"))
     {
         copy_fi("root/temp--1.txt",filename) ;
         *(saved) = true ;
     }
-    else if(compare_my_func(string_inpu, "saveas") == 0) // take addresss // saveas ""
+    else if(compare_my_func(string_inpu, "saveas")) // take addresss // saveas ""
     {
         copy_fi("root/temp--1.txt",filename) ;
         char filename2[MAX_line] ;
@@ -4085,19 +4086,19 @@ void do_command(int x ,int y , bool* saved)
         rename(filename, filename2) ;
         *(saved) = true ;
     }
-    else if(compare_my_func(string_inpu, "paste") == 0)
+    else if(compare_my_func(string_inpu, "paste"))
     {
         memset(string_inpu, 0, sizeof(string_inpu));
 
         snprintf(string_inpu ,MAX_line,"pastestr--file/root/temp--1.txt --pos %d:%d",y,x) ;
         paste_func() ;
     }
-    else if(compare_my_func(string_inpu, "open") == 0)
+    else if(compare_my_func(string_inpu, "open"))
     {
         bringefilename(5) ;
         *(saved) = false ;
     }
-    else if(compare_my_func(string_inpu, "u") == 0 || compare_my_func(string_inpu, "undo") == 0)
+    else if(compare_my_func(string_inpu, "u") || compare_my_func(string_inpu, "undo"))
     {
         memset(string_inpu, 0, sizeof(string_inpu)) ;
         if(*(saved))
@@ -4144,12 +4145,12 @@ int do_move(int size_line[] ,int* first_line ,int* x_i , int* y_i , char kind)
     switch (inpu)
     {
         case 'k' :
-            if((*(y_i) - *(first_line)) > 4)
+            if((*(y_i) - *(first_line)) > 4 )
             {
                 *(y_i) -= 1;
                 if(size_line[*(y_i) - 1] < *(x_i))
                 {
-                    *(x_i) = size_line[*(y_i) - 1] -1 ;
+                    *(x_i) = size_line[*(y_i) - 1] -2 ;
                 }
             }
             else if(*(y_i) != 1)
@@ -4165,7 +4166,7 @@ int do_move(int size_line[] ,int* first_line ,int* x_i , int* y_i , char kind)
                 }
                 if(size_line[*(y_i) - 1] < *(x_i))
                 {
-                    *(x_i) = size_line[*(y_i) - 1] -1 ;
+                    *(x_i) = size_line[*(y_i) - 1] -2 ;
                 }
             }
 
@@ -4177,7 +4178,7 @@ int do_move(int size_line[] ,int* first_line ,int* x_i , int* y_i , char kind)
                 *(y_i) += 1;
                 if(size_line[*(y_i) - 1] < *(x_i))
                 {
-                    *(x_i) = size_line[*(y_i) - 1] -1 ;
+                    *(x_i) = size_line[*(y_i) - 1] -2 ;
                 }
             }
             else
@@ -4187,7 +4188,7 @@ int do_move(int size_line[] ,int* first_line ,int* x_i , int* y_i , char kind)
 
                 if((size_line[*(y_i) - 1] != 0 ) && (size_line[*(y_i) - 1] < *(x_i)))
                 {
-                    *(x_i) = size_line[*(y_i) - 1] -1 ;
+                    *(x_i) = size_line[*(y_i) - 1] -2 ;
                 }
             }
         
@@ -4222,7 +4223,7 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
 
     copy_fi(filename,"root/temp--1.txt") ;
 
-    FILE* file = fopen("root/temp--1.txt" , "a") ;
+    FILE* file = fopen("root/temp--1.txt" , "a+") ;
     
     if(file == NULL)
     {
@@ -4250,12 +4251,11 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
         if(feof(file))
             keep_reading = false ;
 
-        printf("here33\n") ;
         if((line >= *(first_line)) && (line <= (*(first_line)+distance)))
         {
             cnt_line++ ;
 
-            int len = strlen(buffer) ; 
+            int len = size_line[line-1] ; 
             while(len > 144)
             {
                 distance -- ;
@@ -4263,175 +4263,203 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
             }
 
             printf(WHT "%3d " , line ,RESET) ;
-            if(*(y) <= *(l_y))
+            if(mode == 1)
             {
-                if(line >= *(y) && line <= *(l_y))
+                if(*(y) <= *(l_y))
                 {
-                    if(line == *(y) && line == *(l_y))
+                    if(line >= *(y) && line <= *(l_y))
                     {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
+                        if(line == *(y) && line == *(l_y))
                         {
-                            if(i >= *(x) && i <= *(l_x))
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
                             {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(i == *(l_x))
-                                    be4clip[k] = '\0' ;
+                                if(i >= *(x) && i <= *(l_x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(i == *(l_x))
+                                        be4clip[k] = '\0' ;
 
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
-                                else
-                                    printf(CYN "%c",buffer[i],RESET) ;
-                            }
-                            else if(i <= *(x) && i >= *(l_x))
-                            {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(i == *(x))
-                                    be4clip[k] = '\0' ;
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
+                                else if(i <= *(x) && i >= *(l_x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(i == *(x))
+                                        be4clip[k] = '\0' ;
 
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
                                 else
-                                    printf(CYN "%c",buffer[i],RESET) ;
+                                    printf(WHT "%c",buffer[i],RESET ) ;
                             }
-                            else
-                                printf(WHT "%c",buffer[i],RESET ) ;
                         }
-                    }
-                    else if(line == *(l_y))
-                    {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
+                        else if(line == *(l_y))
                         {
-                            if(i <= *(l_x))
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
                             {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(i == *(l_x))
-                                    be4clip[k] = '\0' ;
+                                if(i <= *(l_x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(i == *(l_x))
+                                        be4clip[k] = '\0' ;
 
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
                                 else
-                                    printf(CYN "%c",buffer[i],RESET) ;
+                                    printf(WHT "%c",buffer[i],RESET ) ;
                             }
-                            else
-                                printf(WHT "%c",buffer[i],RESET ) ;
                         }
-                    }
-                    else if(line == *(y))
-                    {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
+                        else if(line == *(y))
                         {
-                            if(i >= *(x))
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
+                            {
+                                if(i >= *(x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
+                                else
+                                    printf(WHT "%c",buffer[i],RESET ) ;
+                            }
+                        }
+                        else
+                        {
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
                             {
                                 be4clip[k] = buffer[i] ;
                                 k++;
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
-                                else
-                                    printf(CYN "%c",buffer[i],RESET) ;
                             }
-                            else
-                                printf(WHT "%c",buffer[i],RESET ) ;
+                            printf(CYN "%s",buffer , RESET) ;
                         }
                     }
                     else
                     {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
-                        {
-                            be4clip[k] = buffer[i] ;
-                            k++;
-                        }
-                        printf(CYN "%s",buffer , RESET) ;
+                        printf(WHT "%s" , buffer ,RESET) ;
                     }
                 }
                 else
                 {
-                    printf(WHT "%s" , buffer ,RESET) ;
+                    if(line <= *(y) && line >= *(l_y))
+                    {
+                        if(line == *(y) && line == *(l_y))
+                        {
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
+                            {
+                                if((i >= *(x) && i <= *(l_x)))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(i == *(l_x))
+                                        be4clip[k] = '\0' ;
+
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
+                                else if(i <= *(x) && i >= *(l_x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(i == *(x))
+                                        be4clip[k] = '\0' ;
+
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
+                                else
+                                    printf(WHT "%c",buffer[i],RESET ) ;
+                            }
+                        }
+                        else if(line == *(y))
+                        {
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
+                            {
+                                if(i <= *(x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(i == *(x))
+                                        be4clip[k] = '\0' ;
+
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
+                                else
+                                    printf(WHT "%c",buffer[i],RESET ) ;
+                            }
+                        }
+                        else if(line == *(l_y))
+                        {
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
+                            {
+                                if(i >= *(l_x))
+                                {
+                                    be4clip[k] = buffer[i] ;
+                                    k++;
+                                    if(buffer[i] == ' ')
+                                        printf(CYN "_" RESET) ;
+                                    else
+                                        printf(CYN "%c",buffer[i],RESET) ;
+                                }
+                                else
+                                    printf(WHT "%c",buffer[i],RESET ) ;
+                            }
+                        }
+                        else
+                        {
+                            for(int i = 0 ; i < strlen(buffer) ; i++)
+                            {
+                                be4clip[k] = buffer[i] ;
+                                k++;
+                            }
+                            printf(CYN "%s",buffer , RESET) ;
+                        }
+                    }
+                    else
+                    {
+                        printf(WHT "%s" , buffer ,RESET) ;
+                    }
                 }
             }
+            
             else
             {
-                if(line <= *(y) && line >= *(l_y))
+                if(line == *(y))
                 {
-                    if(line == *(y) && line == *(l_y))
+                    for(int i = 0 ; i < strlen(buffer) ; i++)
                     {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
+                        if(i == *(x))
                         {
-                            if((i >= *(x) && i <= *(l_x)))
-                            {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(i == *(l_x))
-                                    be4clip[k] = '\0' ;
-
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
-                                else
-                                    printf(CYN "%c",buffer[i],RESET) ;
-                            }
-                            else if(i <= *(x) && i >= *(l_x))
-                            {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(i == *(x))
-                                    be4clip[k] = '\0' ;
-
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
-                                else
-                                    printf(CYN "%c",buffer[i],RESET) ;
-                            }
+                            if(buffer[i] == ' ')
+                                printf(CYN "_" RESET) ;
                             else
-                                printf(WHT "%c",buffer[i],RESET ) ;
+                                printf(CYN "%c",buffer[i],RESET) ;
                         }
-                    }
-                    else if(line == *(y))
-                    {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
+                        else
                         {
-                            if(i <= *(x))
-                            {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(i == *(x))
-                                    be4clip[k] = '\0' ;
-
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
-                                else
-                                    printf(CYN "%c",buffer[i],RESET) ;
-                            }
-                            else
-                                printf(WHT "%c",buffer[i],RESET ) ;
+                            printf(WHT "%c",buffer[i],RESET ) ;
                         }
-                    }
-                    else if(line == *(l_y))
-                    {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
-                        {
-                            if(i >= *(l_x))
-                            {
-                                be4clip[k] = buffer[i] ;
-                                k++;
-                                if(buffer[i] == ' ')
-                                    printf(CYN "_" RESET) ;
-                                else
-                                    printf(CYN "%c",buffer[i],RESET) ;
-                            }
-                            else
-                                printf(WHT "%c",buffer[i],RESET ) ;
-                        }
-                    }
-                    else
-                    {
-                        for(int i = 0 ; i < strlen(buffer) ; i++)
-                        {
-                            be4clip[k] = buffer[i] ;
-                            k++;
-                        }
-                        printf(CYN "%s",buffer , RESET) ;
                     }
                 }
                 else
@@ -4439,14 +4467,14 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
                     printf(WHT "%s" , buffer ,RESET) ;
                 }
             }
-
+            
             if(!keep_reading) printf("\n") ;
         }
 
         line++ ;
     }
 
-    
+    fclose(file) ;
 
     if(cnt_line != distance+1)
     {
@@ -4455,7 +4483,7 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
             cnt_line++ ;
             printf(WHT "%3d " , line ,RESET) ;
 
-            if(line == *(l_y))
+            if(line == *(y))
             {
                 printf(CYN "_" RESET) ;
             }
@@ -4468,8 +4496,9 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
             line++;
         }
     }
+    
+    
 
-    printf("herererererer\n\n");
     char name_fi[100] ;
     name_file2(name_fi) ;
     
@@ -4516,12 +4545,12 @@ void show_window(int* first_line , int* mode ,int* x , int* y,int* l_x ,int* l_y
         }
     }
 
-    fclose(file) ;
-    fprintf(file,"\n222herererererer22\n\n");
+   
+    // fprintf(file,"\n222herererererer22\n\n");
     if(*(mode) == 0 )
     {
         char input = getch() ;
-        if(do_move(size_line,first_line,l_x,l_y,input) == 1)
+        if(do_move(size_line,first_line,x,y,input) == 1)
         {
             memset(string_inpu,0,sizeof(string_inpu));
 
@@ -4654,11 +4683,21 @@ int main()
     // FILE* emty = fopen("emty.txt", "w");
     // fclose(emty);
 
-    int* first_line = 1 ;
-    int* mode = 0 ;
-    int* x = 0 , *l_x = 0 ;
-    int* y = 1 , *l_y = 0 ;
-    bool* saved = false ;
+    int* first_line = (int*)malloc(sizeof(int)) ;
+    int* mode = (int*)malloc(sizeof(int));
+    int* x = (int*)malloc(sizeof(int));
+    int *l_x = (int*)malloc(sizeof(int)) ;
+    int* y = (int*)malloc(sizeof(int)) ;
+    int *l_y = (int*)malloc(sizeof(int)) ;
+    bool* saved = (bool*)malloc(sizeof(bool)) ;
+
+    *(first_line) = 1 ;
+    *(x) = 0 ;
+    *(y) = 1 ;
+    *(l_x) = 0 ;
+    *(l_y) = 1 ;
+    *(saved) = false ;
+    *(mode) = 0 ;
 
     // strcat(filename,"emty.txt");
     while(1)
